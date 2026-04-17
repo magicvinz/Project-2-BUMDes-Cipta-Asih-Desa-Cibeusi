@@ -1,0 +1,18 @@
+// variables
+$primary: #3b0082;
+
+// Import Bootstrap CSS
+@import "bootstrap/scss/bootstrap";
+
+// NProgress CSS
+@import "nprogress/nprogress.css";
+
+// Custom NProgress Color (Menyesuaikan dengan warna tema SI-ASIH)
+#nprogress .bar {
+    background: $primary !important;
+}
+
+#nprogress .spinner-icon {
+    border-top-color: $primary !important;
+    border-left-color: $primary !important;
+}

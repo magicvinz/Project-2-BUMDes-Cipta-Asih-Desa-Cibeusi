@@ -1,0 +1,5 @@
+2026/02/25-11:02:33.258 27ec Creating DB c:\laragon\www\siasih\wa-bot\wa_session\session\Default\EdgeCoupons/coupons_data.db since it was missing.
+2026/02/25-11:02:33.301 27ec Reusing MANIFEST c:\laragon\www\siasih\wa-bot\wa_session\session\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/02/25-11:02:33.424 33e0 Level-0 table #5: started
+2026/02/25-11:02:33.431 33e0 Level-0 table #5: 681581 bytes OK
+2026/02/25-11:02:33.443 33e0 Delete type=0 #3

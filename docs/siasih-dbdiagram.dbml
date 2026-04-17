@@ -1,0 +1,123 @@
+// =============================================================================
+// SI-ASIH - Entity Relationship Diagram (ERD)
+// Salin dan tempel ke https://dbdiagram.io/d
+// =============================================================================
+// Memenuhi: 1) Entitas  2) Atribut  3) PK/FK  4) Relasi  5) Kardinalitas
+// =============================================================================
+
+Project SI_ASIH {
+  database_type: 'MySQL'
+  Note: 'Sistem Informasi Pemesanan Tiket Wisata - BUMDes Cipta Asih Desa Cibeusi'
+}
+
+// =============================================================================
+// ENTITAS 1: USERS (Pengguna Sistem)
+// =============================================================================
+Table users {
+  id bigint [pk, increment, note: 'Primary Key']
+  name varchar(255) [not null]
+  email varchar(255) [not null, unique]
+  email_verified_at timestamp [null]
+  password varchar(255) [not null]
+  remember_token varchar(100) [null]
+  role varchar(20) [not null, default: 'pengunjung', note: 'pengunjung | admin | pengelola_bumdes']
+  wisata_id bigint [null, ref: > wisata.id, note: 'Foreign Key - hanya untuk admin']
+  google_id varchar(255) [null, unique]
+  avatar varchar(255) [null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    email
+    wisata_id
+  }
+
+  Note: 'Entitas pengguna: pengunjung (pemesan), admin (per wisata), pengelola_bumdes'
+}
+
+// =============================================================================
+// ENTITAS 2: WISATA (Tempat Wisata)
+// =============================================================================
+Table wisata {
+  id bigint [pk, increment, note: 'Primary Key']
+  nama varchar(255) [not null]
+  slug varchar(255) [not null, unique]
+  harga_tiket decimal(12, 0) [not null]
+  deskripsi text [null]
+  gambar varchar(255) [null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    slug
+  }
+
+  Note: 'Entitas tempat wisata (Curug Cibareubeuy, Puncak Pasir Ipis, Bukit Panineungan)'
+}
+
+// =============================================================================
+// ENTITAS 3: TIKET (Pemesanan Tiket)
+// =============================================================================
+Table tiket {
+  id bigint [pk, increment, note: 'Primary Key']
+  user_id bigint [not null, ref: > users.id, note: 'Foreign Key ke users']
+  wisata_id bigint [not null, ref: > wisata.id, note: 'Foreign Key ke wisata']
+  kode_tiket varchar(20) [not null, unique]
+  jumlah int [not null, default: 1]
+  total_harga decimal(12, 0) [not null]
+  status varchar(20) [not null, default: 'pending', note: 'pending | paid | used | expired | cancelled']
+  midtrans_order_id varchar(255) [null]
+  midtrans_transaction_id varchar(255) [null]
+  tanggal_berkunjung date [not null]
+  camping varchar(20) [null, note: 'Ya/Tidak - khusus Curug Cibareubeuy']
+  parkir_tipe varchar(30) [null]
+  parkir_harga decimal(12, 0) [default: 0]
+  used_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (wisata_id, status)
+    (user_id, status)
+    tanggal_berkunjung
+    kode_tiket
+  }
+
+  Note: 'Entitas tiket pemesanan wisata - menghubungkan pengunjung dan wisata'
+}
+
+// =============================================================================
+// ENTITAS 4: PRODUK_KHAS (Produk Unggulan Desa)
+// =============================================================================
+Table produk_khas {
+  id bigint [pk, increment, note: 'Primary Key']
+  nama varchar(255) [not null]
+  keterangan text [null]
+  gambar varchar(255) [null]
+  urutan int [default: 0]
+  created_at timestamp
+  updated_at timestamp
+
+  Note: 'Entitas produk khas Desa Cibeusi - tidak punya relasi (standalone)'
+}
+
+// =============================================================================
+// RELASI & KARDINALITAS
+// =============================================================================
+// Ref: child.foreign_key > parent.primary_key
+// Arti: banyak (child) mengacu ke satu (parent)
+
+// Relasi 1: USERS --< WISATA  (N:1)
+// Kardinalitas: Banyak users (admin) dapat terhubung ke satu wisata
+// Sebuah wisata dapat memiliki banyak admin
+Ref: users.wisata_id > wisata.id [delete: set null]
+
+// Relasi 2: TIKET --< USERS  (N:1)
+// Kardinalitas: Banyak tiket dimiliki oleh satu user (pengunjung)
+// Satu pengunjung dapat memiliki banyak tiket
+Ref: tiket.user_id > users.id [delete: cascade]
+
+// Relasi 3: TIKET --< WISATA  (N:1)
+// Kardinalitas: Banyak tiket untuk satu wisata
+// Satu wisata dapat memiliki banyak tiket
+Ref: tiket.wisata_id > wisata.id [delete: cascade]

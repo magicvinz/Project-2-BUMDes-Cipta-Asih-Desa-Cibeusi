@@ -1,0 +1,4 @@
+2026/02/25-11:09:10.417 2258 Creating DB C:\laragon\www\siasih\wa-bot\wa_session\session\Default\Extension Rules since it was missing.
+2026/02/25-11:09:10.461 2258 Reusing MANIFEST C:\laragon\www\siasih\wa-bot\wa_session\session\Default\Extension Rules/MANIFEST-000001
+2026/02/25-11:09:10.462 2258 Recovering log #3
+2026/02/25-11:09:10.463 2258 Reusing old log C:\laragon\www\siasih\wa-bot\wa_session\session\Default\Extension Rules/000003.log 
