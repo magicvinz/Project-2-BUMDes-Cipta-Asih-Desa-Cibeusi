@@ -53,7 +53,7 @@
                 Total pendapatan akan dihitung otomatis berdasarkan jumlah tiket × harga.
             </div>
 
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-column flex-sm-row gap-2">
                 <button type="submit" class="btn btn-primary px-4">
                     <i class="bi bi-save me-1"></i> Simpan
                 </button>

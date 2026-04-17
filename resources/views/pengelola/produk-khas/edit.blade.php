@@ -61,7 +61,7 @@
                         @error('gambar')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     
-                    <div class="d-flex gap-2 mt-4">
+                    <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
                         <button type="submit" class="btn btn-primary px-4 fw-medium">Simpan Perubahan</button>
                         <a href="{{ route('pengelola.produk-khas.index') }}" class="btn btn-light px-4 fw-medium">Batal</a>
                     </div>

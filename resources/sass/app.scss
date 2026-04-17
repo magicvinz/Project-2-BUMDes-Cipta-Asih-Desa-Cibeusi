@@ -1,5 +1,6 @@
 // variables
-$primary: #3b0082;
+$primary: #0096c7;   // Vibrant Water Blue
+$secondary: #38b000; // Vibrant Forest Green
 
 // Import Bootstrap CSS
 @import "bootstrap/scss/bootstrap";
@@ -7,12 +8,272 @@ $primary: #3b0082;
 // NProgress CSS
 @import "nprogress/nprogress.css";
 
-// Custom NProgress Color (Menyesuaikan dengan warna tema SI-ASIH)
 #nprogress .bar {
-    background: $primary !important;
+    background: #ffb703 !important; /* Contrasting golden yellow */
+    height: 4px !important; /* Make it thicker and more visible */
+    z-index: 9999 !important;
+    box-shadow: 0 0 10px #ffb703, 0 0 5px #ffb703 !important;
 }
 
 #nprogress .spinner-icon {
-    border-top-color: $primary !important;
-    border-left-color: $primary !important;
+    border-top-color: #ffb703 !important;
+    border-left-color: #ffb703 !important;
+}
+
+// ==== PLAYFUL & VIBRANT STYLING BASE ====
+body {
+    // Background gradien pelangi lembut yang dinamis
+    background: radial-gradient(circle at top left, #e0fbfc, transparent 40%),
+                radial-gradient(circle at bottom right, #d8f3dc, transparent 40%),
+                #f0fdf4;
+    background-attachment: fixed;
+    color: #023047;
+}
+
+// ==== BUBBLY BUTTONS ====
+.btn-primary {
+    background: linear-gradient(45deg, #0077b6, #00b4d8);
+    border: none;
+    border-radius: 50px; // Pill shape untuk kesan playful
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.6rem 2rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); // Bouncy efek
+    color: white;
+    
+    &:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 10px 20px rgba(0, 180, 216, 0.4);
+        color: white;
+    }
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #2d6a4f, #52b788);
+    border: none;
+    border-radius: 50px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.6rem 2rem;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    &:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 10px 20px rgba(82, 183, 136, 0.4);
+        color: white;
+    }
+}
+
+.btn-warning {
+    border-radius: 50px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    &:hover {
+        transform: translateY(-4px) scale(1.1);
+        box-shadow: 0 10px 25px rgba(255, 183, 3, 0.5);
+    }
+}
+
+.btn-outline-primary {
+    border: 2px solid #00b4d8;
+    border-radius: 50px;
+    font-weight: 800;
+    color: #0077b6;
+    padding: 0.5rem 1.8rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: transparent;
+    
+    &:hover {
+        background: linear-gradient(45deg, #0077b6, #00b4d8);
+        border-color: transparent;
+        color: white;
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 10px 20px rgba(0, 180, 216, 0.3);
+    }
+}
+
+.btn-outline-light {
+    border-radius: 50px;
+    font-weight: 800;
+    border-width: 2px;
+    padding: 0.5rem 1.8rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    &:hover {
+        background: white;
+        color: #0077b6 !important;
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 10px 20px rgba(255, 255, 255, 0.4);
+    }
+}
+
+.btn-light {
+    border-radius: 50px;
+    font-weight: 800;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: none;
+    
+    &:hover {
+        background: #fdfdfd;
+        color: #2d6a4f !important;
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 10px 25px rgba(255, 255, 255, 0.5);
+    }
+}
+
+// ==== VIBRANT CARDS ====
+.card {
+    border: 3px solid transparent;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+
+    .card-title {
+        color: #023e8a;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+    }
+
+    // Tambahan aksen warna-warni (Hanya Biru & Hijau)
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #0077b6, #00b4d8, #52b788, #2a9d8f);
+        z-index: 2;
+    }
+
+    .card-img-top {
+        border-radius: 17px 17px 0 0;
+        transition: transform 0.5s ease;
+    }
+
+    &:hover {
+        transform: translateY(-10px) rotate(1deg); // playful tilt hover
+        border-color: rgba(0, 180, 216, 0.2);
+        box-shadow: 0 15px 40px rgba(0, 180, 216, 0.2);
+        
+        .card-img-top {
+            transform: scale(1.1); // zoom in foto
+        }
+    }
+}
+
+// ==== VIBRANT HERO GRADIENT (ANIMATED) ====
+.bg-vibrant-hero {
+    background: linear-gradient(-45deg, #0077b6, #00b4d8, #52b788, #2d6a4f);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
+    color: white;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0, 180, 216, 0.3);
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+// ==== ANIMATIONS ====
+.float-element {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+// ==== NAVBAR & DROPDOWNS ====
+.navbar {
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-bottom: 2px solid rgba(0,180,216,0.1); // subtle vibrant edge
+    z-index: 1040; // Pastikan navbar di atas segalanya
+}
+
+.dropdown-menu {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 50, 100, 0.12);
+    padding: 0.8rem 0;
+    margin-top: 10px;
+    animation: dropDownAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1050; // Cukup tinggi agar tidak tertutup konten hero/slider
+
+    .dropdown-item {
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        color: #023047;
+        transition: all 0.2s ease;
+        
+        &:hover {
+            background-color: rgba(0, 180, 216, 0.1);
+            color: #0077b6;
+            padding-left: 1.8rem; // Sedikit geser ke kanan untuk efek rapi
+        }
+
+        &.text-danger:hover {
+            background-color: rgba(255, 0, 50, 0.1) !important;
+            color: #d90429 !important;
+        }
+    }
+
+    .dropdown-divider {
+        border-top: 2px dashed rgba(0, 0, 0, 0.05);
+        margin: 0.5rem 0;
+    }
+}
+
+// Tambahan animasi kecil saat dropdown terbuka
+@keyframes dropDownAnim {
+    0% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+// ==== GRADIENT TEXT TITLE ====
+.text-gradient {
+    /* Hanya kombinasi Hijau dan Biru untuk dominasi Hutan dan Air */
+    background: linear-gradient(45deg, #023e8a, #00b4d8, #2d6a4f, #52b788);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+}
+
+// ==== GLOBAL VIBRANT PAGE HEADERS (Untuk semua halaman sistem) ====
+h4.fs-4.fw-semibold,
+h4.card-title.fs-4.fw-semibold {
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(45deg, #023e8a, #00b4d8, #2d6a4f, #52b788);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.05));
+    letter-spacing: -0.5px;
+}
+
+// ==== GLOBAL VIBRANT TABLES ====
+.table-light {
+    background: linear-gradient(90deg, rgba(0, 180, 216, 0.1), rgba(45, 106, 79, 0.1)) !important;
+    th {
+        background-color: transparent !important;
+        color: #023e8a !important;
+        font-weight: 800 !important;
+        border-bottom: 2px solid rgba(0, 119, 182, 0.2);
+    }
 }

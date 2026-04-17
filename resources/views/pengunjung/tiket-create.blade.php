@@ -13,7 +13,7 @@
     </ol>
 </nav>
 
-<div class="row">
+<div class="row" data-aos="fade-up">
     <div class="col-lg-8 col-xl-6">
         <div class="card shadow-sm border-0">
             <div class="card-body p-4 p-md-5">
@@ -75,9 +75,9 @@
                         </table>
                     </div>
                     
-                    <div class="d-flex gap-2 mt-4 pt-2">
-                        <button type="submit" class="btn btn-primary px-4 fw-medium">Lanjut ke Pembayaran</button>
-                        <a href="{{ route('pengunjung.dashboard') }}" class="btn btn-outline-secondary px-4 fw-medium">Batal</a>
+                    <div class="d-flex flex-column flex-sm-row gap-2 mt-4 pt-2">
+                        <button type="submit" class="btn btn-primary px-4 fw-medium w-100">Lanjut ke Pembayaran</button>
+                        <a href="{{ route('pengunjung.dashboard') }}" class="btn btn-outline-secondary px-4 fw-medium w-100 text-center">Batal</a>
                     </div>
                 </form>
             </div>

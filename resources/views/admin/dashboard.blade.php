@@ -35,7 +35,7 @@
 <div class="card shadow-sm border-0">
     <div class="card-body">
         <h5 class="card-title fw-semibold mb-3">Aksi Cepat</h5>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-column flex-sm-row gap-2">
             <a href="{{ route('admin.validasi.index') }}" class="btn btn-primary d-inline-flex align-items-center fw-medium">
                 <i class="bi bi-qr-code-scan me-2"></i> Scan QR Tiket
             </a>

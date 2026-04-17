@@ -9,9 +9,14 @@
         <h4 class="fs-4 fw-semibold mb-1">Laporan Penjualan</h4>
         <p class="text-muted mb-0 small">{{ $wisata->nama }}</p>
     </div>
-    <a href="{{ route('admin.penjualan-offline.create') }}" class="btn btn-primary shadow-sm">
-        <i class="bi bi-plus-circle me-1"></i> Input Penjualan Offline
-    </a>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <a href="{{ route('admin.laporan.print', request()->all()) }}" target="_blank" class="btn btn-outline-primary shadow-sm">
+            <i class="bi bi-printer me-1"></i> Cetak
+        </a>
+        <a href="{{ route('admin.penjualan-offline.create') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Input Penjualan Offline
+        </a>
+    </div>
 </div>
 
 {{-- ── Filter ─────────────────────────────────────────────────────────────── --}}
@@ -213,7 +218,7 @@
                 </div>
                 <h5 class="fw-bold mb-1">Hapus Data Offline?</h5>
                 <p class="text-muted mb-4">Data penjualan offline tanggal <strong id="tanggalHapus"></strong> akan dihapus secara permanen.</p>
-                <div class="d-flex gap-2 justify-content-center">
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
                     <button type="button" class="btn btn-light px-4 fw-medium rounded-pill" data-bs-dismiss="modal">Batal</button>
                     <form id="formHapusOffline" method="POST" class="d-inline">
                         @csrf

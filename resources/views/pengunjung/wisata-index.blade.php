@@ -3,10 +3,10 @@
 @section('title', 'Pilih Wisata')
 
 @section('content')
-<h4 class="fs-4 fw-semibold mb-4">Pilih Tempat Wisata</h4>
+<h4 class="fs-4 fw-semibold mb-4" data-aos="fade-down">Pilih Tempat Wisata</h4>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
     @foreach($wisata as $w)
-    <div class="col">
+    <div class="col" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
         <div class="card shadow-sm border-0 h-100 hover-shadow transition-all">
             <div class="card-body d-flex flex-column p-4">
                 <h5 class="card-title fw-semibold text-dark">{{ $w->nama }}</h5>

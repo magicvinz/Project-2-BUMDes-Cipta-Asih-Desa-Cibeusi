@@ -3,7 +3,7 @@
 @section('title', 'Pembayaran Tiket')
 
 @section('content')
-<div class="row justify-content-center">
+<div class="row justify-content-center" data-aos="zoom-in">
     <div class="col-lg-10 col-xl-8">
         <div class="card shadow-sm border-0 mb-4 overflow-hidden">
             <div class="card-header bg-primary text-white d-flex flex-wrap align-items-center justify-content-between p-3 border-0 gap-3">

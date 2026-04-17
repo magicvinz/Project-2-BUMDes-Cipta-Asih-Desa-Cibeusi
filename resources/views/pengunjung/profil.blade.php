@@ -3,7 +3,7 @@
 @section('title', 'Profil Saya')
 
 @section('content')
-<h4 class="fs-4 fw-semibold mb-4">Profil Saya</h4>
+<h4 class="fs-4 fw-semibold mb-4" data-aos="fade-down">Profil Saya</h4>
 
 
 @if(session('warning'))
@@ -14,7 +14,7 @@
 @endif
 
 <div class="row g-4">
-    <div class="col-lg-4">
+    <div class="col-lg-4" data-aos="fade-right">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-body text-center p-4">
                 <div class="position-relative d-inline-block mb-3">
@@ -52,7 +52,7 @@
         </div>
     </div>
     
-    <div class="col-lg-8">
+    <div class="col-lg-8" data-aos="fade-left">
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
                 <h6 class="fw-semibold mb-0"><i class="bi bi-person-lines-fill me-2"></i> Lengkapi Data Diri</h6>
@@ -97,7 +97,8 @@
                         @error('asal_kota')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     
-                    <div class="d-flex justify-content-end">
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="{{ route('password.edit') }}" class="btn btn-outline-secondary px-4 fw-medium"><i class="bi bi-key me-2"></i>Ubah Kata Sandi</a>
                         <button type="submit" class="btn btn-primary px-4 fw-medium">Simpan Perubahan</button>
                     </div>
                 </form>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Laporan Penjualan</title>
+    <title>Laporan_Penjualan_Wisata_{{ str_replace(' ', '_', $label) }}</title>
     <style>
         /* CSS Khusus Print (Minimalist & Professional) */
         @page { size: A4 portrait; margin: 2 cm; }

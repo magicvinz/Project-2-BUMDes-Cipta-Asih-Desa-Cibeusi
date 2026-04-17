@@ -3,13 +3,13 @@
 @section('title', 'Tiket Saya')
 
 @section('content')
-<h4 class="fs-4 fw-semibold mb-4">Tiket Saya</h4>
+<h4 class="fs-4 fw-semibold mb-4" data-aos="fade-down">Tiket Saya</h4>
 @if($tiket->isEmpty())
     <div class="alert alert-info text-center" role="alert">
         Anda belum memiliki tiket. <a href="{{ route('pengunjung.dashboard') }}" class="alert-link">Pesan tiket</a>
     </div>
 @else
-    <div class="card shadow-sm border-0 mb-4">
+    <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover table-striped align-middle mb-0">

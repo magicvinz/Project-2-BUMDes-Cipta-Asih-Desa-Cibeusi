@@ -5,7 +5,7 @@
 @section('content')
 <div class="container py-4">
     <div class="row mb-4">
-        <div class="col-12 text-center">
+        <div class="col-12 text-center" data-aos="fade-down">
             <h1 class="fw-bold text-primary">Produk Khas Cibeusi</h1>
             <p class="text-muted">Temukan kerajinan dan kuliner otentik dari warga lokal</p>
         </div>
@@ -13,7 +13,7 @@
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
         @forelse($produk as $p)
-            <div class="col">
+            <div class="col" data-aos="zoom-in-up" data-aos-delay="{{ $loop->iteration * 100 }}">
                 <div class="card h-100 shadow-sm border-0">
                     <img src="{{ $p->gambar_url }}" class="card-img-top" alt="{{ $p->nama }}" style="height: 180px; object-fit: cover;">
                     <div class="card-body d-flex flex-column">

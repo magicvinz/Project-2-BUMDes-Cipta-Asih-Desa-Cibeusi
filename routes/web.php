@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
 
         // Laporan
         Route::get('/laporan', [LaporanAdminController::class, 'index'])->name('laporan');
+        Route::get('/laporan/print', [LaporanAdminController::class, 'print'])->name('laporan.print');
 
         // Penjualan offline
         Route::resource('penjualan-offline', AdminLaporanOfflineController::class)->except(['show'])->names([

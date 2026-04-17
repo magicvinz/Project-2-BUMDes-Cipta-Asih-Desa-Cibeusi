@@ -105,4 +105,65 @@ class LaporanAdminController extends Controller
             'grandTotal'
         ));
     }
+
+    public function print(Request $request)
+    {
+        $user   = Auth::user();
+        $wisata = $user->wisata;
+
+        if (! $wisata) {
+            return redirect()->route('home')
+                ->with('error', 'Admin tidak terhubung ke wisata.');
+        }
+
+        $periode = $request->get('periode', 'hari'); // hari | minggu | bulan
+        $tanggal = $request->get('tanggal', now()->format('Y-m-d'));
+
+        // ── Query Tiket Online (status paid atau used) ────────────────────────
+        $queryOnline = Tiket::with('user')
+            ->where('id_wisata', $wisata->id)
+            ->whereIn('status', ['paid', 'used']);
+
+        // ── Query Penjualan Offline ───────────────────────────────────────────
+        $queryOffline = PenjualanOffline::with('creator')
+            ->where('id_wisata', $wisata->id);
+
+        // ── Terapkan filter periode ───────────────────────────────────────────
+        if ($periode === 'hari') {
+            $date  = Carbon::parse($tanggal);
+            $label = $date->translatedFormat('l, d F Y');
+            $queryOnline->whereDate('created_at', $date);
+            $queryOffline->whereDate('tanggal', $date);
+        } elseif ($periode === 'minggu') {
+            $date  = Carbon::parse($tanggal);
+            $start = $date->copy()->startOfWeek();
+            $end   = $date->copy()->endOfWeek();
+            $label = 'Minggu ' . $start->format('d/m') . ' – ' . $end->format('d/m/Y');
+            $queryOnline->whereBetween('created_at', [$start, $end]);
+            $queryOffline->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()]);
+        } else {
+            $date  = Carbon::parse($tanggal);
+            $label = $date->translatedFormat('F Y');
+            $queryOnline->whereMonth('created_at', $date->month)->whereYear('created_at', $date->year);
+            $queryOffline->whereMonth('tanggal', $date->month)->whereYear('tanggal', $date->year);
+        }
+
+        $dataOnline  = $queryOnline->orderBy('created_at')->get();
+        $dataOffline = $queryOffline->orderBy('tanggal')->orderBy('id_penjualan_offline')->get();
+
+        // ── Ringkasan ─────────────────────────────────────────────────────────
+        $totalTiketOnline      = $dataOnline->sum('jumlah');
+        $totalPendapatanOnline = $dataOnline->sum('total_harga');
+        $totalTiketOffline     = $dataOffline->sum('jumlah_tiket');
+        $totalPendapatanOffline = $dataOffline->sum('total_pendapatan');
+        $grandTotal            = $totalPendapatanOnline + $totalPendapatanOffline;
+
+        return view('admin.laporan-print', compact(
+            'wisata', 'periode', 'tanggal', 'label',
+            'dataOnline', 'dataOffline',
+            'totalTiketOnline', 'totalPendapatanOnline',
+            'totalTiketOffline', 'totalPendapatanOffline',
+            'grandTotal'
+        ));
+    }
 }

@@ -130,7 +130,7 @@
                 </div>
                 <h5 class="fw-bold mb-1">Hapus Foto?</h5>
                 <p class="text-muted mb-4">Foto ini akan dihapus dari galeri secara permanen.</p>
-                <div class="d-flex gap-2 justify-content-center">
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
                     <button type="button" class="btn btn-light px-4 fw-medium rounded-pill" data-bs-dismiss="modal">Batal</button>
                     <form id="formHapusFoto" method="POST" class="d-inline">
                         @csrf

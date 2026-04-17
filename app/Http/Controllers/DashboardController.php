@@ -9,6 +9,7 @@ class DashboardController extends Controller
 {
     public function __invoke(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if ($user->isPengelolaBumdes()) {

@@ -62,7 +62,7 @@
             <div class="alert alert-info alert-permanent py-2 px-3 small border-0 bg-info bg-opacity-10 text-info-emphasis mb-3" id="preview-total">
             </div>
 
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-column flex-sm-row gap-2">
                 <button type="submit" class="btn btn-primary px-4">
                     <i class="bi bi-save me-1"></i> Perbarui
                 </button>

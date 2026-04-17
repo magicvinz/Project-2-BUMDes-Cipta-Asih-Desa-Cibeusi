@@ -16,7 +16,7 @@
 </div>
 @endif
 
-<div class="row justify-content-center">
+<div class="row justify-content-center" data-aos="zoom-in">
     <div class="col-md-8 col-lg-6">
         <div class="card shadow-sm border-0">
             <div class="card-body p-4 p-sm-5 text-center">
