@@ -7,13 +7,13 @@
     $unitHargaOffline = $penjualanOffline->jumlah_tiket > 0
         ? (int) round($penjualanOffline->total_pendapatan / $penjualanOffline->jumlah_tiket)
         : 0;
-    $defaultKeteranganOffline = ($wisata->isCurugCibarebeuy() && $unitHargaOffline === \App\Models\Wisata::HARGA_CAMPING_TIKET_CURUG) ? 'camping' : '';
+    $defaultKeteranganOffline = ($wisata->hasCamping() && $unitHargaOffline === $wisata->harga_camping_efektif) ? 'camping' : '';
 @endphp
 <div class="mb-4">
     <h4 class="fs-4 fw-semibold mb-1">Edit Penjualan Offline</h4>
     <p class="text-muted mb-0 small">Wisata: <strong>{{ $wisata->nama }}</strong>
-        @if($wisata->isCurugCibarebeuy())
-            | <strong>Kunjungan</strong> Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }} · <strong>Camping</strong> Rp {{ number_format(\App\Models\Wisata::HARGA_CAMPING_TIKET_CURUG, 0, ',', '.') }} <span class="text-muted">per tiket</span>
+        @if($wisata->hasCamping())
+            | <strong>Kunjungan</strong> Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }} · <strong>Camping</strong> Rp {{ number_format($wisata->harga_camping_efektif, 0, ',', '.') }} <span class="text-muted">per tiket</span>
         @else
             | Harga tiket: <strong>Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }}</strong>
         @endif
@@ -46,7 +46,7 @@
                 @enderror
             </div>
 
-            @if($wisata->isCurugCibarebeuy())
+            @if($wisata->hasCamping())
             <div class="mb-3">
                 <label for="keterangan" class="form-label fw-medium">Keterangan</label>
                 <select name="keterangan" id="keterangan" class="form-select">
@@ -74,7 +74,7 @@
 @endsection
 
 @push('scripts')
-@php $hargaCampingVal = \App\Models\Wisata::HARGA_CAMPING_TIKET_CURUG; @endphp
+@php $hargaCampingVal = $wisata->harga_camping_efektif; @endphp
 <script>
 (function() {
     function initEditOffline() {

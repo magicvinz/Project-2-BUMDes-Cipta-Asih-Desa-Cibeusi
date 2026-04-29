@@ -27,13 +27,15 @@ Route::get('/', function () {
     $wisata = \App\Models\Wisata::orderBy('nama')->get();
     $produk = \App\Models\ProdukKhas::with('wisata')->orderBy('urutan')->orderBy('nama')->get();
     return view('home', compact('wisata', 'produk'));
-})->name('home');
+})->name('home')->middleware('pengunjung_only');
 
 Route::get('/wisata', [PublicController::class, 'wisataIndex'])->name('public.wisata.index');
 Route::get('/wisata/{wisata:slug}', [PublicController::class, 'wisataShow'])->name('public.wisata.show');
 
 Route::get('/produk-khas', [PublicController::class, 'produkKhasIndex'])->name('public.produk-khas.index');
 Route::get('/produk-khas/{produk_khas}', [PublicController::class, 'produkKhasShow'])->name('public.produk-khas.show');
+
+Route::get('/api/cuaca-bmkg', [PublicController::class, 'getWeather'])->name('api.cuaca-bmkg');
 
 // ══════════════════════════════════════════════════════════════════════════════
 // AUTENTIKASI — hanya untuk tamu (belum login)
@@ -97,7 +99,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/tiket/{tiket}', [TiketController::class, 'show'])->name('tiket.show');
         Route::get('/tiket/{tiket}/bayar', [TiketController::class, 'bayar'])->name('tiket.bayar');
         Route::get('/tiket/{tiket}/qrcode', [TiketController::class, 'qrcode'])->name('tiket.qrcode');
-        Route::post('/tiket/{tiket}/simulasi-bayar', [TiketController::class, 'simulasiBayar'])->name('tiket.simulasi-bayar');
     });
 
     // ══════════════════════════════════════════════════════════════════════════

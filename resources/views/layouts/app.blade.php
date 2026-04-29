@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-cibeusi.png') }}">
     <title>@yield('title', 'SI-ASIH') - BUMDes Cipta Asih</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,18 +13,6 @@
     @stack('styles')
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .navbar-brand { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.5px; }
-        .nav-link { font-weight: 500; }
-        
-        /* Bouncy Nav Item */
-        .nav-item-bouncy .nav-link {
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: inline-block;
-        }
-        .nav-item-bouncy .nav-link:hover {
-            transform: translateY(-3px) scale(1.1);
-            text-shadow: 0 4px 15px rgba(255,255,255,0.9) !important;
-        }
 
         /* Mobile Navbar Cleanup */
         .navbar-toggler { border: none; padding: 0.25rem 0.5rem; }
@@ -58,6 +47,74 @@
             }
             .dropdown-divider {
                 border-color: rgba(255,255,255,0.2) !important;
+            }
+        }
+        
+        /* Mobile Table Card View */
+        @media (max-width: 767.98px) {
+            .table-responsive {
+                border: none !important;
+                overflow-x: visible !important;
+            }
+            .table-responsive table thead {
+                display: none;
+            }
+            .table-responsive table, .table-responsive table tbody, .table-responsive table tfoot, .table-responsive table tr, .table-responsive table td {
+                display: block;
+                width: 100%;
+            }
+            .table-responsive table tr {
+                margin-bottom: 1rem;
+                background-color: #fff;
+                border: 1px solid rgba(0,0,0,.125) !important;
+                border-radius: 0.5rem;
+                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+                overflow: hidden;
+            }
+            .table-responsive table td {
+                text-align: right !important;
+                padding: 0.75rem 1rem !important;
+                position: relative;
+                border: none !important;
+                border-bottom: 1px solid rgba(0,0,0,.05) !important;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                min-height: 3rem;
+            }
+            .table-responsive table td:last-child {
+                border-bottom: none !important;
+            }
+            .table-responsive table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 1rem;
+                width: 45%;
+                text-align: left;
+                font-weight: 600;
+                color: #495057;
+                font-size: 0.85rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .table-responsive table td > * {
+                max-width: 50%;
+                text-align: right;
+            }
+            .table-responsive table td[colspan] {
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            .table-responsive table td[colspan]::before {
+                display: none;
+            }
+            .table-responsive table tfoot td:first-child {
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            .table-responsive table tfoot td:first-child::before {
+                display: none;
             }
         }
     </style>
@@ -95,7 +152,7 @@
 
                     @guest
                     <li class="nav-item text-center mt-2 mt-lg-0 ms-lg-4">
-                        <a href="{{ route('login') }}" class="btn btn-outline-light px-4 rounded-pill fw-bold" style="border-width: 2px;">Login</a>
+                        <a href="{{ route('login') }}" class="btn btn-outline-light px-4 rounded-pill fw-bold" style="border-width: 2px;">Masuk</a>
                     </li>
                     <li class="nav-item text-center mt-2 mt-lg-0 ms-lg-2">
                         <a href="{{ route('register') }}" class="btn btn-light px-4 rounded-pill fw-bold shadow-sm" style="color: #2d6a4f;">Daftar</a>
@@ -140,7 +197,8 @@
         </div>
     </nav>
 
-    <main class="flex-grow-1 container py-4">
+    @stack('hero')
+    <main class="flex-grow-1 container pt-4 pb-4">
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
@@ -193,6 +251,33 @@
                     }
                 });
             }, 10000); // 10 detik
+
+            // Mobile Responsive Tables Logic
+            document.querySelectorAll('.table-responsive table').forEach(function(table) {
+                var headers = [];
+                // Get header texts
+                table.querySelectorAll('thead th').forEach(function(th) {
+                    headers.push(th.innerText.trim());
+                });
+                
+                // Apply to tbody rows
+                table.querySelectorAll('tbody tr').forEach(function(tr) {
+                    tr.querySelectorAll('td').forEach(function(td, index) {
+                        if (headers[index] && !td.hasAttribute('colspan')) {
+                            td.setAttribute('data-label', headers[index]);
+                        }
+                    });
+                });
+
+                // Apply to tfoot rows
+                table.querySelectorAll('tfoot tr').forEach(function(tr) {
+                    tr.querySelectorAll('td, th').forEach(function(td, index) {
+                        if (headers[index] && td.tagName.toLowerCase() === 'td' && !td.hasAttribute('colspan')) {
+                            td.setAttribute('data-label', headers[index]);
+                        }
+                    });
+                });
+            });
         });
     </script>
 

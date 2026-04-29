@@ -29,7 +29,7 @@
     <div class="col-12 col-md-8 col-lg-5">
         <div class="card shadow-sm border-0 rounded-3">
             <div class="card-body p-4 p-md-5">
-                <h4 class="card-title fs-4 fw-semibold mb-4 text-center">Login SI-ASIH</h4>
+                <h4 class="card-title fs-4 fw-semibold mb-4 text-center w-100" style="text-align: center;">Masuk</h4>
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
                     <div class="mb-3">

@@ -10,7 +10,8 @@
     </a>
 </div>
 
-<div class="card shadow-sm border-0">
+{{-- Tampilan Desktop (Tabel) --}}
+<div class="card shadow-sm border-0 d-none d-md-block">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover table-striped align-middle mb-0">
@@ -28,15 +29,17 @@
                             <div class="fw-medium text-dark">{{ $p->nama }}</div>
                         </td>
                         <td class="px-4 py-3 small text-muted">{{ Str::limit($p->keterangan, 50) }}</td>
-                        <td class="px-4 py-3 text-end">
-                            <a href="{{ route('pengelola.produk-khas.show', $p) }}" class="btn btn-sm btn-outline-info fw-medium me-1">Detail</a>
-                            <a href="{{ route('pengelola.produk-khas.edit', $p) }}" class="btn btn-sm btn-outline-primary fw-medium me-1">Ubah</a>
-                            <button type="button"
-                                class="btn btn-sm btn-outline-danger fw-medium btn-hapus"
-                                data-nama="{{ $p->nama }}"
-                                data-action="{{ route('pengelola.produk-khas.destroy', $p) }}">
-                                Hapus
-                            </button>
+                        <td class="px-4 py-3 text-end text-nowrap">
+                            <div class="d-flex justify-content-end gap-1">
+                                <a href="{{ route('pengelola.produk-khas.show', $p) }}" class="btn btn-sm btn-outline-info fw-medium">Detail</a>
+                                <a href="{{ route('pengelola.produk-khas.edit', $p) }}" class="btn btn-sm btn-outline-primary fw-medium">Ubah</a>
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-danger fw-medium btn-hapus"
+                                    data-nama="{{ $p->nama }}"
+                                    data-action="{{ route('pengelola.produk-khas.destroy', $p) }}">
+                                    Hapus
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -50,6 +53,36 @@
             </table>
         </div>
     </div>
+</div>
+
+{{-- Tampilan Mobile (Card) --}}
+<div class="d-md-none">
+    @forelse($produk as $p)
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <h5 class="card-title fw-bold text-dark mb-2">{{ $p->nama }}</h5>
+            
+            <p class="card-text small text-muted mb-3">{{ Str::limit($p->keterangan, 80) }}</p>
+            
+            <div class="d-flex gap-2">
+                <a href="{{ route('pengelola.produk-khas.show', $p) }}" class="btn btn-sm btn-outline-info flex-fill fw-medium">Detail</a>
+                <a href="{{ route('pengelola.produk-khas.edit', $p) }}" class="btn btn-sm btn-outline-primary flex-fill fw-medium">Ubah</a>
+                <button type="button"
+                    class="btn btn-sm btn-outline-danger flex-fill fw-medium btn-hapus"
+                    data-nama="{{ $p->nama }}"
+                    data-action="{{ route('pengelola.produk-khas.destroy', $p) }}">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+    @empty
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center text-muted py-5">
+            Belum ada produk khas. <br><a href="{{ route('pengelola.produk-khas.create') }}" class="text-primary text-decoration-none mt-2 d-inline-block">Tambah produk</a>
+        </div>
+    </div>
+    @endforelse
 </div>
 
 {{-- Modal Konfirmasi Hapus --}}

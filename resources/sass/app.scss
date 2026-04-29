@@ -1,5 +1,5 @@
 // variables
-$primary: #0096c7;   // Vibrant Water Blue
+$primary: #0096c7; // Vibrant Water Blue
 $secondary: #38b000; // Vibrant Forest Green
 
 // Import Bootstrap CSS
@@ -9,10 +9,13 @@ $secondary: #38b000; // Vibrant Forest Green
 @import "nprogress/nprogress.css";
 
 #nprogress .bar {
-    background: #ffb703 !important; /* Contrasting golden yellow */
-    height: 4px !important; /* Make it thicker and more visible */
-    z-index: 9999 !important;
-    box-shadow: 0 0 10px #ffb703, 0 0 5px #ffb703 !important;
+    background: #ffb703 !important;
+    /* Contrasting golden yellow */
+    height: 5px !important;
+    /* Slightly thicker */
+    z-index: 999999 !important;
+    /* Extremely high z-index */
+    box-shadow: 0 0 15px #ffb703, 0 0 10px #ffb703 !important;
 }
 
 #nprogress .spinner-icon {
@@ -24,8 +27,8 @@ $secondary: #38b000; // Vibrant Forest Green
 body {
     // Background gradien pelangi lembut yang dinamis
     background: radial-gradient(circle at top left, #e0fbfc, transparent 40%),
-                radial-gradient(circle at bottom right, #d8f3dc, transparent 40%),
-                #f0fdf4;
+        radial-gradient(circle at bottom right, #d8f3dc, transparent 40%),
+        #f0fdf4;
     background-attachment: fixed;
     color: #023047;
 }
@@ -41,7 +44,7 @@ body {
     padding: 0.6rem 2rem;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); // Bouncy efek
     color: white;
-    
+
     &:hover {
         transform: translateY(-4px) scale(1.05);
         box-shadow: 0 10px 20px rgba(0, 180, 216, 0.4);
@@ -59,7 +62,7 @@ body {
     padding: 0.6rem 2rem;
     color: white;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    
+
     &:hover {
         transform: translateY(-4px) scale(1.05);
         box-shadow: 0 10px 20px rgba(82, 183, 136, 0.4);
@@ -73,8 +76,9 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
     &:hover {
-        transform: translateY(-4px) scale(1.1);
+        transform: translateY(-4px) scale(1.03);
         box-shadow: 0 10px 25px rgba(255, 183, 3, 0.5);
     }
 }
@@ -87,7 +91,7 @@ body {
     padding: 0.5rem 1.8rem;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     background: transparent;
-    
+
     &:hover {
         background: linear-gradient(45deg, #0077b6, #00b4d8);
         border-color: transparent;
@@ -103,7 +107,7 @@ body {
     border-width: 2px;
     padding: 0.5rem 1.8rem;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    
+
     &:hover {
         background: white;
         color: #0077b6 !important;
@@ -117,7 +121,7 @@ body {
     font-weight: 800;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: none;
-    
+
     &:hover {
         background: #fdfdfd;
         color: #2d6a4f !important;
@@ -146,7 +150,9 @@ body {
     &::before {
         content: "";
         position: absolute;
-        top: 0; left: 0; right: 0;
+        top: 0;
+        left: 0;
+        right: 0;
         height: 6px;
         background: linear-gradient(90deg, #0077b6, #00b4d8, #52b788, #2a9d8f);
         z-index: 2;
@@ -158,12 +164,12 @@ body {
     }
 
     &:hover {
-        transform: translateY(-10px) rotate(1deg); // playful tilt hover
-        border-color: rgba(0, 180, 216, 0.2);
-        box-shadow: 0 15px 40px rgba(0, 180, 216, 0.2);
-        
+        transform: translateY(-8px); /* Naik tegak lurus tanpa rotate */
+        border-color: rgba(0, 180, 216, 0.25);
+        box-shadow: 0 16px 40px rgba(0, 180, 216, 0.2);
+
         .card-img-top {
-            transform: scale(1.1); // zoom in foto
+            transform: scale(1.06);
         }
     }
 }
@@ -179,9 +185,17 @@ body {
 }
 
 @keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 // ==== ANIMATIONS ====
@@ -190,16 +204,24 @@ body {
 }
 
 @keyframes floating {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
-    100% { transform: translateY(0px); }
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
 }
 
 // ==== NAVBAR & DROPDOWNS ====
 .navbar {
     backdrop-filter: blur(12px);
     background-color: rgba(255, 255, 255, 0.85) !important;
-    border-bottom: 2px solid rgba(0,180,216,0.1); // subtle vibrant edge
+    border-bottom: 2px solid rgba(0, 180, 216, 0.1); // subtle vibrant edge
     z-index: 1040; // Pastikan navbar di atas segalanya
 }
 
@@ -217,7 +239,7 @@ body {
         font-weight: 600;
         color: #023047;
         transition: all 0.2s ease;
-        
+
         &:hover {
             background-color: rgba(0, 180, 216, 0.1);
             color: #0077b6;
@@ -238,8 +260,15 @@ body {
 
 // Tambahan animasi kecil saat dropdown terbuka
 @keyframes dropDownAnim {
-    0% { opacity: 0; transform: translateY(-10px) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 // ==== GRADIENT TEXT TITLE ====
@@ -250,7 +279,7 @@ body {
     background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
-    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 // ==== GLOBAL VIBRANT PAGE HEADERS (Untuk semua halaman sistem) ====
@@ -263,13 +292,14 @@ h4.card-title.fs-4.fw-semibold {
     background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
-    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.05));
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.05));
     letter-spacing: -0.5px;
 }
 
 // ==== GLOBAL VIBRANT TABLES ====
 .table-light {
     background: linear-gradient(90deg, rgba(0, 180, 216, 0.1), rgba(45, 106, 79, 0.1)) !important;
+
     th {
         background-color: transparent !important;
         color: #023e8a !important;

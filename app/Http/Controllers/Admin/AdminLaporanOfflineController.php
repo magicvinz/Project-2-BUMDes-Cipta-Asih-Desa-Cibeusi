@@ -64,7 +64,7 @@ class AdminLaporanOfflineController extends Controller
         ]);
 
         $harga = $wisata->harga_tiket;
-        if ($wisata->isCurugCibarebeuy() && $request->input('keterangan') === 'camping') {
+        if ($wisata->hasCamping() && $request->input('keterangan') === 'camping') {
             $harga = Wisata::HARGA_CAMPING_TIKET_CURUG;
         }
 
@@ -111,7 +111,7 @@ class AdminLaporanOfflineController extends Controller
         ]);
 
         $harga = $wisata->harga_tiket;
-        if ($wisata->isCurugCibarebeuy() && $request->input('keterangan') === 'camping') {
+        if ($wisata->hasCamping() && $request->input('keterangan') === 'camping') {
             $harga = Wisata::HARGA_CAMPING_TIKET_CURUG;
         }
 

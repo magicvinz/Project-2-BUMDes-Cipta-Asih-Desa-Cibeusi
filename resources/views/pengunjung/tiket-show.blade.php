@@ -25,7 +25,7 @@
                 <p class="mb-2 text-muted small">Kode: <strong>{{ $tiket->kode_tiket }}</strong></p>
                 <p class="mb-2">Jumlah: {{ $tiket->jumlah }} pengunjung</p>
                 <p class="mb-2">Tanggal berkunjung: {{ $tiket->tanggal_berkunjung->format('d F Y') }}</p>
-                @if($tiket->wisata->isCurugCibarebeuy() && $tiket->camping)
+                @if($tiket->wisata->hasCamping() && $tiket->camping)
                 <p class="mb-2">Keterangan: <strong>{{ $tiket->camping === 'Ya' ? 'Camping' : 'Kunjungan' }}</strong></p>
                 @endif
                 
@@ -103,15 +103,8 @@
                             <input type="hidden" name="id_tiket" value="{{ $tiket->id }}">
                             <input type="hidden" name="id_wisata" value="{{ $tiket->id_wisata }}">
                             <div class="mb-3">
-                                <label class="form-label small fw-medium">Penilaian Rating (1-5)</label>
-                                <select name="rating" class="form-select @error('rating') is-invalid @enderror" required>
-                                    <option value="5" {{ old('rating') == '5' ? 'selected' : '' }}>5 - Sangat Puas</option>
-                                    <option value="4" {{ old('rating') == '4' ? 'selected' : '' }}>4 - Puas</option>
-                                    <option value="3" {{ old('rating') == '3' ? 'selected' : '' }}>3 - Cukup</option>
-                                    <option value="2" {{ old('rating') == '2' ? 'selected' : '' }}>2 - Kurang</option>
-                                    <option value="1" {{ old('rating') == '1' ? 'selected' : '' }}>1 - Kecewa</option>
-                                </select>
-                                @error('rating')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <label class="form-label small fw-medium">Penilaian Rating</label>
+                                @include('components.star-rating', ['name' => 'rating', 'value' => old('rating', 5), 'id' => 'rating-tiket-show'])
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-medium">Komentar Singkat</label>

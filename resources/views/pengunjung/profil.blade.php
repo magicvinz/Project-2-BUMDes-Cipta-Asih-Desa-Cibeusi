@@ -142,14 +142,8 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label class="form-label small fw-medium">Penilaian Rating (1-5)</label>
-                                            <select name="rating" class="form-select" required>
-                                                <option value="5" {{ $r->rating == 5 ? 'selected' : '' }}>5 - Sangat Puas</option>
-                                                <option value="4" {{ $r->rating == 4 ? 'selected' : '' }}>4 - Puas</option>
-                                                <option value="3" {{ $r->rating == 3 ? 'selected' : '' }}>3 - Cukup</option>
-                                                <option value="2" {{ $r->rating == 2 ? 'selected' : '' }}>2 - Kurang</option>
-                                                <option value="1" {{ $r->rating == 1 ? 'selected' : '' }}>1 - Kecewa</option>
-                                            </select>
+                                            <label class="form-label small fw-medium">Penilaian Rating</label>
+                                            @include('components.star-rating', ['name' => 'rating', 'value' => $r->rating, 'id' => 'rating-edit-'.$r->id])
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label small fw-medium">Komentar Singkat</label>

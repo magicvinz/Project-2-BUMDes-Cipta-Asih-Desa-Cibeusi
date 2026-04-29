@@ -38,7 +38,7 @@ class TiketController extends Controller
             'tanggal_berkunjung' => ['required', 'date', 'after_or_equal:today'],
             'camping' => ['nullable', 'in:Ya,Tidak'],
         ];
-        $isCurug = $wisata->isCurugCibarebeuy();
+        $isCurug = $wisata->hasCamping();
         if ($isCurug) {
             $rules['camping'] = ['required', 'in:Ya,Tidak'];
         }
@@ -77,8 +77,8 @@ class TiketController extends Controller
             ]);
         }
 
-        // Mode simulasi: langsung ke halaman tiket (anggap bayar manual / offline)
-        return redirect()->route('pengunjung.tiket.show', $tiket)->with('success', 'Pemesanan berhasil. Silakan lakukan pembayaran atau gunakan simulasi.');
+        // Mode simulasi dinonaktifkan: jika Midtrans gagal, arahkan ke detail tiket dengan pesan error
+        return redirect()->route('pengunjung.tiket.show', $tiket)->with('error', 'Pemesanan tiket berhasil, tetapi sistem pembayaran saat ini sedang gangguan. Silakan coba klik Bayar beberapa saat lagi.');
     }
 
     /**
@@ -103,7 +103,7 @@ class TiketController extends Controller
             ]);
         }
 
-        $msg = 'Midtrans tidak tersedia. Gunakan simulasi pembayaran di halaman detail tiket.';
+        $msg = 'Sistem pembayaran sedang mengalami gangguan teknis. Silakan coba beberapa saat lagi.';
         if (session('midtrans_error') && config('app.debug')) {
             $msg .= ' (Debug: ' . session('midtrans_error') . ')';
         }
@@ -138,7 +138,7 @@ class TiketController extends Controller
 
         if ($request->expectsJson() || $request->ajax()) {
             $items = collect($tiket->items())->map(function ($t) {
-                $isCurug = $t->wisata && $t->wisata->isCurugCibarebeuy();
+                $isCurug = $t->wisata && $t->wisata->hasCamping();
                 return [
                     'id' => $t->id,
                     'kode_tiket' => $t->kode_tiket,
@@ -208,35 +208,5 @@ class TiketController extends Controller
         }
     }
 
-    /**
-     * Simulasi pembayaran (untuk development tanpa Midtrans)
-     */
-    public function simulasiBayar(Tiket $tiket)
-    {
-        if ($tiket->id_user !== auth()->id()) {
-            return back()->with('error', 'Anda tidak memiliki akses ke tiket ini.');
-        }
-        if ($tiket->status !== 'pending') {
-            return back()->with('error', $tiket->status === 'paid' || $tiket->status === 'used'
-                ? 'Tiket ini sudah dibayar.'
-                : 'Tiket tidak dapat dibayar. Status: ' . ucfirst($tiket->status));
-        }
 
-        $tiket->update(['status' => 'paid']);
-
-        // Kirim Notifikasi WA (Silakan nyalakan Node.js server)
-        $wa = new \App\Services\WhatsAppService();
-        $userHp = $tiket->user->no_hp;
-        if ($userHp) {
-            $tglStr = \Carbon\Carbon::parse($tiket->tanggal_berkunjung)->format('d/m/Y');
-            $pesan = "Halo {$tiket->user->name},\n\nPembayaran tiket Anda untuk wisata *{$tiket->wisata->nama}* telah berhasil.\n\nKode Tiket: *{$tiket->kode_tiket}*\nJumlah: {$tiket->jumlah} orang\nTanggal: {$tglStr}\n\nTunjukkan e-tiket / QR Code ini di loket masuk.\nTerima kasih!";
-            
-            $encodedContent = urlencode($tiket->qr_content ?? $tiket->kode_tiket);
-            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=240x240&data={$encodedContent}";
-            
-            $wa->sendMedia($userHp, $pesan, $qrUrl);
-        }
-
-        return redirect()->route('pengunjung.tiket.show', $tiket)->with('success', 'Pembayaran berhasil (simulasi). E-Tiket telah dikirimkan via WA.');
-    }
 }

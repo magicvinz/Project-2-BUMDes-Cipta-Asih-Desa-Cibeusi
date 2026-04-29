@@ -3,175 +3,299 @@
 @section('title', 'Scan / Validasi Tiket')
 
 @section('content')
-<h4 class="fs-4 fw-semibold mb-4">Scan QR / Cek Kode Tiket</h4>
-<p class="text-muted mb-4">Validasi tiket wisata <strong>{{ auth()->user()->wisata->nama }}</strong>. Gunakan kamera untuk scan QR atau ketik kode manual.</p>
+<h4 class="fs-4 fw-semibold mb-1">Scan QR / Cek Kode Tiket</h4>
+<p class="text-muted mb-4">Validasi tiket wisata <strong>{{ auth()->user()->wisata->nama }}</strong>. Kamera akan aktif otomatis, atau ketik kode manual.</p>
+
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 
 <div class="row row-cols-1 row-cols-lg-2 g-4">
+
+    {{-- KOLOM KIRI: Kamera QR --}}
     <div class="col">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
                 <span class="fw-medium"><i class="bi bi-camera-video me-2"></i> Scan QR dengan Kamera</span>
-                <button type="button" id="btn-ganti-kamera" class="btn btn-light btn-sm d-none" title="Ganti kamera depan/belakang">
+                <button type="button" id="btn-ganti-kamera" class="btn btn-light btn-sm d-none" title="Ganti kamera">
                     <i class="bi bi-camera-reels me-1"></i> <span id="label-kamera">Kamera Belakang</span>
                 </button>
             </div>
-            <div class="card-body">
-                <div id="qr-permission-prompt" class="text-center py-5 px-3">
-                    <i class="bi bi-camera-video-off display-4 text-muted mb-3 d-block"></i>
-                    <p class="mb-2">Situs ini membutuhkan akses kamera untuk memindai QR code tiket.</p>
-                    <p class="small text-muted mb-4">Klik tombol di bawah dan pilih "Izinkan" saat browser meminta.</p>
-                    <button type="button" id="btn-aktifkan-kamera" class="btn btn-primary fw-medium">
-                        <i class="bi bi-camera-fill me-2"></i> Izinkan & Aktifkan Kamera
-                    </button>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center p-3">
+
+                {{-- Status kamera --}}
+                <div id="qr-status-msg" class="text-center py-3 text-muted small">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Mengaktifkan kamera...
                 </div>
-                
-                <div id="qr-reader-wrap" class="d-none">
-                    <div id="qr-reader" class="w-100 rounded" style="min-height: 280px; overflow: hidden;"></div>
-                    <div id="qr-reader-loading" class="text-center py-3 small text-muted d-none">Meminta akses kamera...</div>
-                </div>
-                
-                <div id="qr-reader-results" class="alert alert-success mt-3 py-2 px-3 small d-none mb-0">
+
+                {{-- Area reader --}}
+                <div id="qr-reader" class="w-100 rounded" style="min-height: 260px; overflow: hidden;"></div>
+
+                {{-- Hasil scan --}}
+                <div id="qr-reader-results" class="alert alert-success mt-3 py-2 px-3 small d-none w-100 mb-0">
                     Kode terdeteksi: <strong id="scanned-code"></strong>
                 </div>
+
+                {{-- Tombol coba lagi (muncul jika error) --}}
+                <button type="button" id="btn-retry-kamera" class="btn btn-outline-primary mt-3 d-none">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Coba Aktifkan Kamera Lagi
+                </button>
             </div>
         </div>
     </div>
-    
+
+    {{-- KOLOM KANAN: Input Manual --}}
     <div class="col">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-secondary text-white py-3">
                 <span class="fw-medium"><i class="bi bi-keyboard me-2"></i> Input Kode Manual</span>
             </div>
             <div class="card-body">
-                <form id="form-cari-tiket" action="{{ route('admin.validasi.cari') }}" method="post">
+                {{-- 
+                    PENTING: data-turbo="false" agar Turbo/Hotwire tidak intercept submit form ini.
+                    Tanpa ini, form POST dikirim via Turbo dan redirect response-nya bisa gagal.
+                --}}
+                <form id="form-cari-tiket"
+                      action="{{ route('admin.validasi.cari') }}"
+                      method="POST"
+                      data-turbo="false">
                     @csrf
                     <div class="input-group mb-3">
-                        <input type="text" name="kode" id="input-kode-tiket" class="form-control text-uppercase px-3 py-2" placeholder="Contoh: SI-ABCD1234" value="{{ old('kode') }}" required autofocus>
-                        <button type="submit" class="btn btn-primary px-4 fw-medium">Cari</button>
+                        <input type="text"
+                               name="kode"
+                               id="input-kode-tiket"
+                               class="form-control text-uppercase px-3 py-2"
+                               placeholder="Contoh: SI-ABCD1234"
+                               value="{{ old('kode') }}"
+                               autocomplete="off"
+                               required
+                               autofocus>
+                        <button type="submit" class="btn btn-primary px-4 fw-medium">
+                            <i class="bi bi-search me-1"></i> Cari
+                        </button>
+                    </div>
+                    <div class="alert alert-info py-2 px-3 small border-0 bg-info bg-opacity-10 text-info-emphasis mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Ketik kode tiket lalu klik <strong>Cari</strong> atau tekan <kbd>Enter</kbd>.
+                        Ketika QR berhasil di-scan, kode otomatis terisi.
                     </div>
                 </form>
-                <div class="alert alert-info py-2 px-3 small border-0 bg-info bg-opacity-10 text-info-emphasis mt-2 mb-0">
-                    <i class="bi bi-info-circle me-1"></i> Ketika QR berhasil di-scan, halaman akan otomatis mengecek tiket.
-                </div>
             </div>
         </div>
     </div>
+
 </div>
 @endsection
 
 @push('scripts')
+{{-- Library html5-qrcode dari CDN, dimuat sebelum script kita --}}
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
-(function() {
-    const inputKode = document.getElementById('input-kode-tiket');
-    const formCari = document.getElementById('form-cari-tiket');
-    const resultsDiv = document.getElementById('qr-reader-results');
-    const scannedCodeEl = document.getElementById('scanned-code');
-    const permissionPrompt = document.getElementById('qr-permission-prompt');
-    const qrReaderWrap = document.getElementById('qr-reader-wrap');
-    const btnAktifkan = document.getElementById('btn-aktifkan-kamera');
-    const btnGantiKamera = document.getElementById('btn-ganti-kamera');
-    const labelKamera = document.getElementById('label-kamera');
-    const qrReaderLoading = document.getElementById('qr-reader-loading');
-
-    var submitted = false;
-    var html5QrCode = new Html5Qrcode('qr-reader');
-    var config = { fps: 10, qrbox: { width: 250, height: 250 } };
+/**
+ * Validasi QR Scanner — kompatibel dengan Hotwire Turbo.
+ * - Kamera aktif otomatis saat halaman dibuka.
+ * - Input manual menggunakan data-turbo="false" (native form submit).
+ * - Gunakan turbo:load bukan DOMContentLoaded agar bekerja saat navigasi Turbo.
+ */
+(function () {
+    var html5QrCode = null;
     var currentFacingMode = 'environment';
+    var scanSubmitted = false;
 
+    // ── Elemen DOM ────────────────────────────────────────────────────────────
+    function getEl(id) { return document.getElementById(id); }
+
+    function setStatusMsg(html, hide) {
+        var el = getEl('qr-status-msg');
+        if (!el) return;
+        el.innerHTML = html;
+        el.classList.toggle('d-none', !!hide);
+    }
+
+    // ── Callback scan sukses ──────────────────────────────────────────────────
     function onScanSuccess(decodedText) {
-        if (submitted) return;
-        var raw = (decodedText || '').trim();
-        var kode = raw.split('\n')[0].trim().toUpperCase();
+        if (scanSubmitted) return;
+        var kode = (decodedText || '').trim().split('\n')[0].trim().toUpperCase();
         if (!kode) return;
-        submitted = true;
-        inputKode.value = kode;
-        if (resultsDiv) {
-            resultsDiv.classList.remove('d-none');
-            if (scannedCodeEl) scannedCodeEl.textContent = kode;
+        scanSubmitted = true;
+
+        // Tampilkan kode terdeteksi
+        var resDiv = getEl('qr-reader-results');
+        var codeEl = getEl('scanned-code');
+        if (resDiv) resDiv.classList.remove('d-none');
+        if (codeEl) codeEl.textContent = kode;
+
+        // Isi input dan submit form
+        var inputKode = getEl('input-kode-tiket');
+        var form = getEl('form-cari-tiket');
+        if (inputKode) inputKode.value = kode;
+        if (form) {
+            // Stop scanner sebelum submit agar kamera bebas
+            stopScanner(function () { form.submit(); });
         }
-        formCari.submit();
     }
 
-    function onScanFailure() {}
+    function onScanFailure() { /* diabaikan */ }
 
-    function showError(message) {
-        if (qrReaderLoading) qrReaderLoading.classList.add('d-none');
-        qrReaderWrap.classList.remove('d-none');
-        var readerEl = qrReaderWrap.querySelector('#qr-reader');
-        readerEl.innerHTML = '<div class="alert alert-warning py-2 mb-0">' + message + ' <button type="button" class="btn btn-sm btn-outline-warning ms-2" id="btn-coba-lagi-kamera">Coba lagi</button></div>';
-        permissionPrompt.classList.add('d-none');
-        if (btnGantiKamera) btnGantiKamera.classList.add('d-none');
-        document.getElementById('btn-coba-lagi-kamera').addEventListener('click', function() {
-            readerEl.innerHTML = '';
-            qrReaderWrap.classList.add('d-none');
-            permissionPrompt.classList.remove('d-none');
-            btnAktifkan.disabled = false;
-            btnAktifkan.innerHTML = '<i class="bi bi-camera-fill me-2"></i> Izinkan & Aktifkan Kamera';
-        });
+    // ── Stop scanner ──────────────────────────────────────────────────────────
+    function stopScanner(callback) {
+        if (html5QrCode) {
+            html5QrCode.stop().then(function () {
+                html5QrCode.clear();
+                if (callback) callback();
+            }).catch(function () {
+                if (callback) callback();
+            });
+        } else {
+            if (callback) callback();
+        }
     }
 
-    function getCameraErrorMessage(err) {
-        var name = err && err.name;
+    // ── Pesan error kamera ────────────────────────────────────────────────────
+    function getCameraErrorMsg(err) {
+        var name = (err && err.name) || '';
         if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-            return 'Izin kamera ditolak. Saat browser meminta izin, pilih "Izinkan" atau buka pengaturan situs untuk mengizinkan kamera.';
+            return '<i class="bi bi-shield-lock me-2 text-warning"></i>Izin kamera ditolak. Klik ikon kunci/kamera di address bar browser dan pilih <strong>Izinkan</strong>, lalu muat ulang halaman.';
         }
-        if (name === 'NotFoundError') {
-            return 'Tidak ada kamera yang terdeteksi.';
+        if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+            return '<i class="bi bi-camera-video-off me-2 text-danger"></i>Tidak ada kamera yang terdeteksi di perangkat ini.';
         }
         if (name === 'SecurityError' || name === 'NotSupportedError') {
-            return 'Akses kamera memerlukan koneksi aman (HTTPS). Buka situs dengan https:// atau gunakan localhost.';
+            return '<i class="bi bi-lock me-2 text-warning"></i>Kamera memerlukan koneksi HTTPS. Gunakan <code>localhost</code> atau buka via <code>https://</code>.';
         }
-        return 'Tidak dapat mengakses kamera. Izinkan kamera di pengaturan browser atau gunakan input kode manual.';
+        return '<i class="bi bi-exclamation-triangle me-2 text-warning"></i>Gagal mengakses kamera. Gunakan input kode manual di sebelah kanan.';
     }
 
+    // ── Tampilkan error kamera ────────────────────────────────────────────────
+    function showCameraError(err) {
+        setStatusMsg('<div class="alert alert-warning py-2 px-3 small mb-0">' + getCameraErrorMsg(err) + '</div>');
+        var btnRetry = getEl('btn-retry-kamera');
+        if (btnRetry) btnRetry.classList.remove('d-none');
+        var btnGanti = getEl('btn-ganti-kamera');
+        if (btnGanti) btnGanti.classList.add('d-none');
+    }
+
+    // ── Start kamera ──────────────────────────────────────────────────────────
     function startCamera(facingMode) {
-        currentFacingMode = facingMode;
-        permissionPrompt.classList.add('d-none');
-        qrReaderWrap.classList.remove('d-none');
-        if (qrReaderLoading) qrReaderLoading.classList.remove('d-none');
-        var readerEl = qrReaderWrap.querySelector('#qr-reader');
-        if (!readerEl.innerHTML.trim()) readerEl.innerHTML = '';
+        currentFacingMode = facingMode || 'environment';
+        scanSubmitted = false;
+
+        var readerEl = getEl('qr-reader');
+        if (!readerEl) return;
+
+        // Pastikan instance baru jika perlu
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode('qr-reader');
+        }
+
+        setStatusMsg('<div class="spinner-border spinner-border-sm me-2" role="status"></div>Mengaktifkan kamera...');
+
+        var config = { fps: 10, qrbox: { width: 240, height: 240 } };
+
         html5QrCode.start(
-            { facingMode: facingMode },
+            { facingMode: currentFacingMode },
             config,
             onScanSuccess,
             onScanFailure
-        ).then(function() {
-            if (qrReaderLoading) qrReaderLoading.classList.add('d-none');
-            if (btnGantiKamera) btnGantiKamera.classList.remove('d-none');
+        ).then(function () {
+            // Kamera aktif
+            setStatusMsg('', true); // sembunyikan pesan status
+            var btnGanti = getEl('btn-ganti-kamera');
+            var labelKamera = getEl('label-kamera');
+            if (btnGanti) btnGanti.classList.remove('d-none');
             if (labelKamera) labelKamera.textContent = currentFacingMode === 'environment' ? 'Kamera Belakang' : 'Kamera Depan';
-        }).catch(function(err) {
-            console.warn('Camera error:', err);
-            showError(getCameraErrorMessage(err));
-            if (btnGantiKamera) btnGantiKamera.classList.add('d-none');
+        }).catch(function (err) {
+            console.warn('[QR Scanner] Camera error:', err);
+            showCameraError(err);
         });
     }
 
+    // ── Ganti kamera (depan ↔ belakang) ──────────────────────────────────────
     function switchCamera() {
-        html5QrCode.stop().then(function() {
-            var nextMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-            startCamera(nextMode);
-            if (labelKamera) labelKamera.textContent = nextMode === 'environment' ? 'Kamera Belakang' : 'Kamera Depan';
-        }).catch(function() {
-            var nextMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-            startCamera(nextMode);
-            if (labelKamera) labelKamera.textContent = nextMode === 'environment' ? 'Kamera Belakang' : 'Kamera Depan';
+        var next = currentFacingMode === 'environment' ? 'user' : 'environment';
+        stopScanner(function () {
+            html5QrCode = new Html5Qrcode('qr-reader');
+            startCamera(next);
         });
     }
 
-    btnAktifkan.addEventListener('click', function() {
-        btnAktifkan.disabled = true;
-        btnAktifkan.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Meminta izin...';
+    // ── Inisialisasi halaman ──────────────────────────────────────────────────
+    function init() {
+        // Pastikan kita di halaman validasi
+        if (!getEl('qr-reader')) return;
+
+        // Reset state
+        html5QrCode = null;
+        scanSubmitted = false;
+
+        // Auto-start kamera
         startCamera('environment');
+
+        // Event: tombol ganti kamera
+        var btnGanti = getEl('btn-ganti-kamera');
+        if (btnGanti) {
+            // Hapus listener lama agar tidak dobel saat navigasi Turbo
+            var newBtn = btnGanti.cloneNode(true);
+            btnGanti.parentNode.replaceChild(newBtn, btnGanti);
+            newBtn.addEventListener('click', function () {
+                newBtn.disabled = true;
+                switchCamera();
+                setTimeout(function () { newBtn.disabled = false; }, 2000);
+            });
+        }
+
+        // Event: tombol coba lagi kamera
+        var btnRetry = getEl('btn-retry-kamera');
+        if (btnRetry) {
+            var newRetry = btnRetry.cloneNode(true);
+            btnRetry.parentNode.replaceChild(newRetry, btnRetry);
+            newRetry.addEventListener('click', function () {
+                newRetry.classList.add('d-none');
+                html5QrCode = new Html5Qrcode('qr-reader');
+                startCamera(currentFacingMode);
+            });
+        }
+    }
+
+    // ── Lifecycle events ──────────────────────────────────────────────────────
+    // turbo:load: dipanggil saat navigasi Turbo maupun load awal
+    document.addEventListener('turbo:load', function () {
+        // Stop scanner lama jika ada (dari navigasi sebelumnya)
+        if (html5QrCode) {
+            html5QrCode.stop().catch(function () {}).finally(function () {
+                html5QrCode = null;
+                init();
+            });
+        } else {
+            init();
+        }
     });
 
-    if (btnGantiKamera) {
-        btnGantiKamera.addEventListener('click', function() {
-            btnGantiKamera.disabled = true;
-            switchCamera();
-            setTimeout(function() { btnGantiKamera.disabled = false; }, 1500);
-        });
+    // turbo:before-cache: hentikan kamera sebelum halaman di-cache Turbo
+    document.addEventListener('turbo:before-cache', function () {
+        if (html5QrCode) {
+            html5QrCode.stop().catch(function () {});
+            html5QrCode = null;
+        }
+        // Sembunyikan reader agar cache tidak menyimpan video frame
+        var readerEl = getEl('qr-reader');
+        if (readerEl) readerEl.innerHTML = '';
+    });
+
+    // Fallback: jika Turbo tidak aktif (DOMContentLoaded biasa)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        // Jika sudah ready dan turbo:load tidak terpicu
+        if (!window._qrInitDone) {
+            window._qrInitDone = true;
+            // Delay sedikit agar library html5-qrcode selesai parse
+            setTimeout(init, 100);
+        }
     }
 })();
 </script>

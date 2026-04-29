@@ -17,7 +17,7 @@
                             <tr class="border-bottom"><td class="text-muted py-2">Pemesan</td><td class="py-2 text-end">{{ $tiket->user->name }}</td></tr>
                             <tr class="border-bottom"><td class="text-muted py-2">Jumlah</td><td class="py-2 text-end">{{ $tiket->jumlah }} pengunjung</td></tr>
                             <tr class="border-bottom"><td class="text-muted py-2">Tanggal Berkunjung</td><td class="py-2 text-end">{{ $tiket->tanggal_berkunjung->format('d F Y') }}</td></tr>
-                            @if($tiket->wisata->isCurugCibarebeuy() && $tiket->camping)
+                            @if($tiket->wisata->hasCamping() && $tiket->camping)
                             <tr class="border-bottom"><td class="text-muted py-2">Keterangan</td><td class="py-2 text-end">{{ $tiket->camping === 'Ya' ? 'Camping' : 'Kunjungan' }}</td></tr>
                             @endif
                             <tr><td class="text-muted py-2">Status</td><td class="py-2 text-end">
@@ -30,7 +30,7 @@
                 </div>
 
                 @if($tiket->status === 'paid')
-                <form action="{{ route('admin.validasi.validasi', $tiket) }}" method="post" class="mt-4">
+                <form action="{{ route('admin.validasi.validasi', $tiket) }}" method="post" class="mt-4" data-turbo="false">
                     @csrf
                     <button type="submit" class="btn btn-primary w-100 py-2 fw-medium">
                         <i class="bi bi-check-circle me-1"></i> Validasi Tiket (Tandai Sudah Terpakai)

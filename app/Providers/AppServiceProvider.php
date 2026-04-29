@@ -23,5 +23,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();
         Carbon::setLocale('id');
+
+        if (str_contains(request()->header('host'), 'ngrok-free.app') || 
+            str_contains(request()->header('host'), 'ngrok.io') || 
+            request()->header('x-forwarded-proto') === 'https') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
     }
 }

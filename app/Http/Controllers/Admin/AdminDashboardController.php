@@ -26,12 +26,23 @@ class AdminDashboardController extends Controller
             return redirect()->route('home')->with('error', 'Admin tidak terhubung ke wisata. Hubungi pengelola untuk menghubungkan akun ke wisata.');
         }
 
-        $hariIni = Tiket::where('id_wisata', $wisata->id)->paid()->whereDate('created_at', today())->count();
-        $bulanIni = Tiket::where('id_wisata', $wisata->id)->paid()->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
-        $totalPendapatanBulan = Tiket::where('id_wisata', $wisata->id)->paid()
+        $hariIniOnline = Tiket::where('id_wisata', $wisata->id)->paid()->whereDate('created_at', today())->sum('jumlah');
+        $hariIniOffline = \App\Models\PenjualanOffline::where('id_wisata', $wisata->id)->whereDate('tanggal', today())->sum('jumlah_tiket');
+        $hariIni = $hariIniOnline + $hariIniOffline;
+
+        $bulanIniOnline = Tiket::where('id_wisata', $wisata->id)->paid()->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->sum('jumlah');
+        $bulanIniOffline = \App\Models\PenjualanOffline::where('id_wisata', $wisata->id)->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year)->sum('jumlah_tiket');
+        $bulanIni = $bulanIniOnline + $bulanIniOffline;
+
+        $pendapatanBulanIniOnline = Tiket::where('id_wisata', $wisata->id)->paid()
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_harga');
+        $pendapatanBulanIniOffline = \App\Models\PenjualanOffline::where('id_wisata', $wisata->id)
+            ->whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year)
+            ->sum('total_pendapatan');
+        $totalPendapatanBulan = $pendapatanBulanIniOnline + $pendapatanBulanIniOffline;
 
         $riwayatValidasi = Tiket::with('user')
             ->where('id_wisata', $wisata->id)
@@ -40,16 +51,24 @@ class AdminDashboardController extends Controller
             ->take(10)
             ->get();
 
+        // Data Chart Perbandingan Online vs Offline Bulan Ini
+        $chartData = [
+            'labels' => ['Online', 'Offline (Di Tempat)'],
+            'tiket' => [(int)$bulanIniOnline, (int)$bulanIniOffline],
+            'pendapatan' => [(float)$pendapatanBulanIniOnline, (float)$pendapatanBulanIniOffline]
+        ];
+
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'wisata_nama' => $wisata->nama,
                 'hariIni' => $hariIni,
                 'bulanIni' => $bulanIni,
                 'totalPendapatanBulan' => $totalPendapatanBulan,
-                'riwayatValidasi' => $riwayatValidasi
+                'riwayatValidasi' => $riwayatValidasi,
+                'chartData' => $chartData
             ]);
         }
 
-        return view('admin.dashboard', compact('wisata', 'hariIni', 'bulanIni', 'totalPendapatanBulan', 'riwayatValidasi'));
+        return view('admin.dashboard', compact('wisata', 'hariIni', 'bulanIni', 'totalPendapatanBulan', 'riwayatValidasi', 'chartData'));
     }
 }

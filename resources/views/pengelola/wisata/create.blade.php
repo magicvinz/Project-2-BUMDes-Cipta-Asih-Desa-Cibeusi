@@ -25,9 +25,15 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="harga_tiket" class="form-label fw-medium">Harga Tiket (Rp) <span class="text-danger">*</span></label>
+                        <label for="harga_tiket" class="form-label fw-medium">Harga Tiket Kunjungan (Rp) <span class="text-danger">*</span></label>
                         <input type="number" name="harga_tiket" id="harga_tiket" value="{{ old('harga_tiket') }}" min="0" class="form-control @error('harga_tiket') is-invalid @enderror" required>
                         @error('harga_tiket')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="harga_camping" class="form-label fw-medium">Harga Tiket Camping (Rp) <span class="text-muted fw-normal small">— biarkan 0 jika tidak ada opsi camping</span></label>
+                        <input type="number" name="harga_camping" id="harga_camping" value="{{ old('harga_camping', 0) }}" min="0" class="form-control @error('harga_camping') is-invalid @enderror" placeholder="Contoh: 25000">
+                        @error('harga_camping')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     
                     <div class="mb-3">

@@ -26,6 +26,7 @@ class Wisata extends Model
         'nama',
         'slug',
         'harga_tiket',
+        'harga_camping',
         'deskripsi',
         'gambar',
         'galleries',
@@ -33,18 +34,31 @@ class Wisata extends Model
 
     protected $casts = [
         'harga_tiket' => 'decimal:0',
+        'harga_camping' => 'decimal:0',
         'galleries' => 'array',
     ];
 
     /** Slug Curug Cibarebeuy (varian penulisan): tiket camping berharga berbeda dari kunjungan. */
     public const SLUGS_CURUG_CIBAREBEUY = ['curug-cibarebeuy', 'curug-cibareubeuy'];
 
-    /** Harga per tiket opsi Camping di Curug; kunjungan memakai kolom `harga_tiket`. */
+    /** Fallback harga camping jika kolom kosong (tetap ada untuk kompatibilitas). */
     public const HARGA_CAMPING_TIKET_CURUG = 25000;
 
     public function isCurugCibarebeuy(): bool
     {
         return in_array($this->slug, self::SLUGS_CURUG_CIBAREBEUY, true);
+    }
+
+    /** Apakah wisata ini memiliki opsi camping. */
+    public function hasCamping(): bool
+    {
+        return $this->harga_camping > 0;
+    }
+
+    /** Harga camping — dari DB jika ada, fallback ke konstanta jika 0 tapi merupakan curug cibarebeuy (untuk safe fallback), tapi di DB sudah 25000. */
+    public function getHargaCampingEfektifAttribute(): int
+    {
+        return (int) $this->harga_camping;
     }
 
     protected static function booted()

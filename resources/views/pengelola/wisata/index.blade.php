@@ -10,7 +10,8 @@
     </a>
 </div>
 
-<div class="card shadow-sm border-0">
+{{-- Tampilan Desktop (Tabel) --}}
+<div class="card shadow-sm border-0 d-none d-md-block">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover table-striped align-middle mb-0">
@@ -29,36 +30,77 @@
                             <div class="fw-medium text-dark">{{ $w->nama }}</div>
                         </td>
                         <td class="px-4 py-3">
-                            @if($w->isCurugCibarebeuy())
+                            @if($w->hasCamping())
                                 <div class="small">Kunjungan: Rp {{ number_format($w->harga_tiket, 0, ',', '.') }}</div>
-                                <div class="small">Camping: Rp {{ number_format(\App\Models\Wisata::HARGA_CAMPING_TIKET_CURUG, 0, ',', '.') }}</div>
+                                <div class="small">Camping: Rp {{ number_format($w->harga_camping_efektif, 0, ',', '.') }}</div>
                             @else
                                 Rp {{ number_format($w->harga_tiket, 0, ',', '.') }}
                             @endif
                         </td>
                         <td class="px-4 py-3 small text-muted">{{ Str::limit($w->deskripsi, 50) }}</td>
-                        <td class="px-4 py-3 text-end">
-                            <a href="{{ route('pengelola.wisata.show', $w) }}" class="btn btn-sm btn-outline-info fw-medium me-1">Detail</a>
-                            <a href="{{ route('pengelola.wisata.edit', $w) }}" class="btn btn-sm btn-outline-primary fw-medium me-1">Ubah</a>
-                            <button type="button"
-                                class="btn btn-sm btn-outline-danger fw-medium btn-hapus"
-                                data-nama="{{ $w->nama }}"
-                                data-action="{{ route('pengelola.wisata.destroy', $w) }}">
-                                Hapus
-                            </button>
+                        <td class="px-4 py-3 text-end text-nowrap">
+                            <div class="d-flex justify-content-end gap-1">
+                                <a href="{{ route('pengelola.wisata.show', $w) }}" class="btn btn-sm btn-outline-info fw-medium">Detail</a>
+                                <a href="{{ route('pengelola.wisata.edit', $w) }}" class="btn btn-sm btn-outline-primary fw-medium">Ubah</a>
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-danger fw-medium btn-hapus"
+                                    data-nama="{{ $w->nama }}"
+                                    data-action="{{ route('pengelola.wisata.destroy', $w) }}">
+                                    Hapus
+                                </button>
+                            </div>
                         </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-5 text-center text-muted">
-                            Belum ada data wisata. <a href="{{ route('pengelola.wisata.create') }}" class="text-primary text-decoration-none">Tambah wisata</a>
-                        </td>
-                    </tr>
-                    @endforelse
+                     </tr>
+                     @empty
+                     <tr>
+                         <td colspan="4" class="px-4 py-5 text-center text-muted">
+                             Belum ada data wisata. <a href="{{ route('pengelola.wisata.create') }}" class="text-primary text-decoration-none">Tambah wisata</a>
+                         </td>
+                     </tr>
+                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+</div>
+
+{{-- Tampilan Mobile (Card) --}}
+<div class="d-md-none">
+    @forelse($wisata as $w)
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <h5 class="card-title fw-bold text-dark mb-2">{{ $w->nama }}</h5>
+            
+            <div class="mb-2">
+                @if($w->hasCamping())
+                    <span class="badge bg-light text-dark border me-1 mb-1 fw-normal">Kunjungan: Rp {{ number_format($w->harga_tiket, 0, ',', '.') }}</span>
+                    <span class="badge bg-light text-dark border mb-1 fw-normal">Camping: Rp {{ number_format($w->harga_camping_efektif, 0, ',', '.') }}</span>
+                @else
+                    <span class="badge bg-light text-dark border mb-1 fw-normal">Tiket: Rp {{ number_format($w->harga_tiket, 0, ',', '.') }}</span>
+                @endif
+            </div>
+
+            <p class="card-text small text-muted mb-3">{{ Str::limit($w->deskripsi, 80) }}</p>
+            
+            <div class="d-flex gap-2">
+                <a href="{{ route('pengelola.wisata.show', $w) }}" class="btn btn-sm btn-outline-info flex-fill fw-medium">Detail</a>
+                <a href="{{ route('pengelola.wisata.edit', $w) }}" class="btn btn-sm btn-outline-primary flex-fill fw-medium">Ubah</a>
+                <button type="button"
+                    class="btn btn-sm btn-outline-danger flex-fill fw-medium btn-hapus"
+                    data-nama="{{ $w->nama }}"
+                    data-action="{{ route('pengelola.wisata.destroy', $w) }}">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+    @empty
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center text-muted py-5">
+            Belum ada data wisata. <br><a href="{{ route('pengelola.wisata.create') }}" class="text-primary text-decoration-none mt-2 d-inline-block">Tambah wisata</a>
+        </div>
+    </div>
+    @endforelse
 </div>
 
 {{-- Modal Konfirmasi Hapus --}}

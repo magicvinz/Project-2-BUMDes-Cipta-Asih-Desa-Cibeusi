@@ -96,7 +96,7 @@ class Tiket extends Model
             \Carbon\Carbon::parse($this->tanggal_berkunjung)->format('Y-m-d'),
         ];
         
-        if ($this->wisata && $this->wisata->isCurugCibarebeuy() && $this->camping) {
+        if ($this->wisata && $this->wisata->hasCamping() && $this->camping) {
             $lines[] = $this->camping === 'Ya' ? 'Camping' : 'Kunjungan';
         }
         

@@ -32,6 +32,29 @@
     </div>
 </div>
 
+<div class="row row-cols-1 row-cols-lg-2 g-4 mb-4">
+    <div class="col">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-semibold mb-3">Penjualan Tiket (Bulan Ini)</h5>
+                <div style="height: 300px;">
+                    <canvas id="tiketChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-semibold mb-3">Pendapatan (Bulan Ini)</h5>
+                <div style="height: 300px;">
+                    <canvas id="pendapatanChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow-sm border-0">
     <div class="card-body">
         <h5 class="card-title fw-semibold mb-3">Aksi Cepat</h5>
@@ -61,9 +84,9 @@
                 <tbody id="admin-riwayat-tbody" class="border-top-0">
                     @forelse($riwayatValidasi as $riwayat)
                     <tr>
-                        <td class="px-3 fw-medium font-monospace">{{ $riwayat->kode_tiket }}</td>
-                        <td class="px-3">{{ $riwayat->user->name ?? 'Pengunjung' }}</td>
-                        <td class="px-3 text-muted">{{ \Carbon\Carbon::parse($riwayat->updated_at)->format('d/m/Y H:i') }}</td>
+                        <td class="px-3 fw-medium font-monospace" data-label="Kode Tiket">{{ $riwayat->kode_tiket }}</td>
+                        <td class="px-3" data-label="Pengunjung">{{ $riwayat->user->name ?? 'Pengunjung' }}</td>
+                        <td class="px-3 text-muted" data-label="Waktu Validasi">{{ \Carbon\Carbon::parse($riwayat->updated_at)->format('d/m/Y H:i') }}</td>
                     </tr>
                     @empty
                     <tr>
@@ -78,49 +101,156 @@
 @endsection
 
 @push('scripts')
+<div id="chart-data-container" data-chart='@json($chartData)' style="display:none;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 (function() {
-    var REALTIME_INTERVAL = 1500;
-    var url = '{{ route("admin.dashboard") }}';
-    function fmtRp(n) { return 'Rp ' + Number(n).toLocaleString('id-ID', { maximumFractionDigits: 0 }); }
-    function fmtTgl(isoStr) { 
-        if(!isoStr) return '-';
-        var d = new Date(isoStr);
-        return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'}) + ' ' + d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-    }
+    let adminDashboardInterval;
 
-    function refresh() {
-        fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                var el = document.getElementById('admin-hari-ini');
-                if (el) el.textContent = data.hariIni;
-                el = document.getElementById('admin-bulan-ini');
-                if (el) el.textContent = data.bulanIni;
-                el = document.getElementById('admin-pendapatan');
-                if (el) el.textContent = fmtRp(data.totalPendapatanBulan);
+    function initAdminDashboard() {
+        // Fix for "Chart is not defined" race condition
+        if (typeof Chart === 'undefined') {
+            setTimeout(initAdminDashboard, 100);
+            return;
+        }
 
-                var tbody = document.getElementById('admin-riwayat-tbody');
-                if (tbody && data.riwayatValidasi) {
-                    var html = '';
-                    if (data.riwayatValidasi.length === 0) {
-                        html = '<tr><td colspan="3" class="text-center text-muted px-3 py-4">Belum ada tiket yang divalidasi hari ini.</td></tr>';
-                    } else {
-                        data.riwayatValidasi.forEach(function(row) {
-                            var visitorName = row.user ? row.user.name : 'Pengunjung';
-                            html += '<tr>' +
-                                '<td class="px-3 fw-medium font-monospace">' + row.kode_tiket + '</td>' +
-                                '<td class="px-3">' + visitorName + '</td>' +
-                                '<td class="px-3 text-muted">' + fmtTgl(row.updated_at) + '</td>' +
-                            '</tr>';
-                        });
-                    }
-                    tbody.innerHTML = html;
+        const dataContainer = document.getElementById('chart-data-container');
+        if (!dataContainer) return;
+        
+        var rawData;
+        try {
+            rawData = JSON.parse(dataContainer.getAttribute('data-chart'));
+        } catch (e) {
+            console.error('Failed to parse chart data', e);
+            return;
+        }
+
+        var tiketCtx = document.getElementById('tiketChart');
+        var pendapatanCtx = document.getElementById('pendapatanChart');
+
+        if (!tiketCtx || !pendapatanCtx) return;
+
+        var tiketChart, pendapatanChart;
+
+        tiketChart = new Chart(tiketCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: rawData.labels,
+                datasets: [{
+                    label: 'Tiket Terjual',
+                    data: rawData.tiket,
+                    backgroundColor: ['#0d6efd', '#ffc107'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
                 }
-            })
-            .catch(function() {});
+            }
+        });
+
+        pendapatanChart = new Chart(pendapatanCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: rawData.labels,
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: rawData.pendapatan,
+                    backgroundColor: ['#198754', '#fd7e14'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var value = context.raw || 0;
+                                return ' ' + context.label + ': Rp ' + Number(value).toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        var REALTIME_INTERVAL = 1500;
+        var url = '{{ route("admin.dashboard") }}';
+        function fmtRp(n) { return 'Rp ' + Number(n).toLocaleString('id-ID', { maximumFractionDigits: 0 }); }
+        function fmtTgl(isoStr) { 
+            if(!isoStr) return '-';
+            var d = new Date(isoStr);
+            return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'}) + ' ' + d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+        }
+
+        function refresh() {
+            fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function(r) { 
+                    if (r.status === 401) {
+                        if (adminDashboardInterval) clearInterval(adminDashboardInterval);
+                        return;
+                    }
+                    return r.json(); 
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    var el = document.getElementById('admin-hari-ini');
+                    if (el) el.textContent = data.hariIni;
+                    el = document.getElementById('admin-bulan-ini');
+                    if (el) el.textContent = data.bulanIni;
+                    el = document.getElementById('admin-pendapatan');
+                    if (el) el.textContent = fmtRp(data.totalPendapatanBulan);
+
+                    var tbody = document.getElementById('admin-riwayat-tbody');
+                    if (tbody && data.riwayatValidasi) {
+                        var html = '';
+                        if (data.riwayatValidasi.length === 0) {
+                            html = '<tr><td colspan="3" class="text-center text-muted px-3 py-4">Belum ada tiket yang divalidasi hari ini.</td></tr>';
+                        } else {
+                            data.riwayatValidasi.forEach(function(row) {
+                                var visitorName = row.user ? row.user.name : 'Pengunjung';
+                                html += '<tr>' +
+                                    '<td class="px-3 fw-medium font-monospace" data-label="Kode Tiket">' + row.kode_tiket + '</td>' +
+                                    '<td class="px-3" data-label="Pengunjung">' + visitorName + '</td>' +
+                                    '<td class="px-3 text-muted" data-label="Waktu Validasi">' + fmtTgl(row.updated_at) + '</td>' +
+                                '</tr>';
+                            });
+                        }
+                        tbody.innerHTML = html;
+                    }
+                    
+                    if (data.chartData) {
+                        if (tiketChart) {
+                            tiketChart.data.labels = data.chartData.labels;
+                            tiketChart.data.datasets[0].data = data.chartData.tiket;
+                            tiketChart.update('none');
+                        }
+                        if (pendapatanChart) {
+                            pendapatanChart.data.labels = data.chartData.labels;
+                            pendapatanChart.data.datasets[0].data = data.chartData.pendapatan;
+                            pendapatanChart.update('none');
+                        }
+                    }
+                })
+                .catch(function() {});
+        }
+
+        if (adminDashboardInterval) clearInterval(adminDashboardInterval);
+        adminDashboardInterval = setInterval(refresh, REALTIME_INTERVAL);
     }
-    setInterval(refresh, REALTIME_INTERVAL);
+
+    document.addEventListener("turbo:load", initAdminDashboard);
+
+    document.addEventListener("turbo:before-cache", function() {
+        if (adminDashboardInterval) clearInterval(adminDashboardInterval);
+    }, { once: true });
 })();
 </script>
 @endpush

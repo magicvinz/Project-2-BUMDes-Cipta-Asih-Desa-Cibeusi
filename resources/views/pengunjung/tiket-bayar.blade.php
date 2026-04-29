@@ -32,7 +32,7 @@
                                     <td class="text-muted ps-0">Jumlah</td>
                                     <td class="text-end pe-0">{{ $tiket->jumlah }} tiket</td>
                                 </tr>
-                                @if($tiket->wisata->isCurugCibarebeuy() && $tiket->camping)
+                                @if($tiket->wisata->hasCamping() && $tiket->camping)
                                 <tr>
                                     <td class="text-muted ps-0">Keterangan</td>
                                     <td class="text-end pe-0">{{ $tiket->camping === 'Ya' ? 'Camping' : 'Kunjungan' }}</td>

@@ -76,9 +76,9 @@
                 <tbody id="dashboard-wisata-tbody" class="border-top-0">
                     @foreach($wisata as $w)
                     <tr>
-                        <td class="px-3 fw-medium">{{ $w->nama }}</td>
-                        <td class="px-3 wisata-tiket">{{ ($w->tiket_online ?? 0) + ($w->tiket_offline ?? 0) }}</td>
-                        <td class="px-3 wisata-pendapatan fw-medium text-success">Rp {{ number_format(($w->pendapatan_online ?? 0) + ($w->pendapatan_offline ?? 0), 0, ',', '.') }}</td>
+                        <td class="px-3 fw-medium" data-label="Wisata">{{ $w->nama }}</td>
+                        <td class="px-3 wisata-tiket" data-label="Jumlah Tiket">{{ ($w->tiket_online ?? 0) + ($w->tiket_offline ?? 0) }}</td>
+                        <td class="px-3 wisata-pendapatan fw-medium text-success" data-label="Pendapatan">Rp {{ number_format(($w->pendapatan_online ?? 0) + ($w->pendapatan_offline ?? 0), 0, ',', '.') }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -92,17 +92,38 @@
 @endsection
 
 @push('scripts')
+<div id="chart-data-container" data-chart='@json($chartData)' style="display:none;"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 (function() {
-    var rawData = {!! json_encode($chartData) !!};
+    let dashboardInterval;
 
-    var tiketCtx = document.getElementById('tiketChart');
-    var pendapatanCtx = document.getElementById('pendapatanChart');
+    function initDashboard() {
+        // Fix for "Chart is not defined" race condition
+        if (typeof Chart === 'undefined') {
+            setTimeout(initDashboard, 100);
+            return;
+        }
 
-    var tiketChart, pendapatanChart;
+        const dataContainer = document.getElementById('chart-data-container');
+        if (!dataContainer) return;
+        
+        var rawData;
+        try {
+            rawData = JSON.parse(dataContainer.getAttribute('data-chart'));
+        } catch (e) {
+            console.error('Failed to parse chart data', e);
+            return;
+        }
 
-    if (tiketCtx) {
+        var tiketCtx = document.getElementById('tiketChart');
+        var pendapatanCtx = document.getElementById('pendapatanChart');
+
+        if (!tiketCtx || !pendapatanCtx) return;
+
+        var tiketChart, pendapatanChart;
+
         tiketChart = new Chart(tiketCtx.getContext('2d'), {
             type: 'doughnut',
             data: {
@@ -122,9 +143,7 @@
                 }
             }
         });
-    }
 
-    if (pendapatanCtx) {
         pendapatanChart = new Chart(pendapatanCtx.getContext('2d'), {
             type: 'bar',
             data: {
@@ -155,75 +174,91 @@
                 }
             }
         });
-    }
 
-    var REALTIME_INTERVAL = 1500;
-    var base_url = '{{ route("pengelola.dashboard") }}';
-    var form = document.getElementById('form-dashboard');
-    var periodeInput = document.getElementById('periode');
+        var REALTIME_INTERVAL = 1500;
+        var base_url = '{{ route("pengelola.dashboard") }}';
+        var form = document.getElementById('form-dashboard');
+        var periodeInput = document.getElementById('periode');
 
-    function fmtRp(n) { return 'Rp ' + Number(n).toLocaleString('id-ID', { maximumFractionDigits: 0 }); }
-    
-    function refresh(forceUpdate) {
-        var url = base_url;
-        if (periodeInput) {
-            url += '?periode=' + encodeURIComponent(periodeInput.value);
+        function fmtRp(n) { return 'Rp ' + Number(n).toLocaleString('id-ID', { maximumFractionDigits: 0 }); }
+        
+        function refresh(forceUpdate) {
+            var url = base_url;
+            if (periodeInput) {
+                url += '?periode=' + encodeURIComponent(periodeInput.value);
+            }
+
+            fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function(r) { 
+                    if (r.status === 401) {
+                        if (dashboardInterval) clearInterval(dashboardInterval);
+                        return;
+                    }
+                    return r.json(); 
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    var el = document.getElementById('dashboard-total-tiket');
+                    if (el) el.textContent = Number(data.totalTiketBulan).toLocaleString('id-ID');
+                    el = document.getElementById('dashboard-total-pendapatan');
+                    if (el) el.textContent = fmtRp(data.totalPendapatanBulan);
+
+                    if (data.labelWaktu) {
+                        document.querySelectorAll('.label-waktu').forEach(function(lbl) {
+                            lbl.textContent = data.labelWaktu;
+                        });
+                    }
+                    
+                    var tbody = document.getElementById('dashboard-wisata-tbody');
+                    if (tbody && data.wisata && data.wisata.length) {
+                        var rows = tbody.querySelectorAll('tr');
+                        
+                        var newLabels = [];
+                        var newTiket = [];
+                        var newPendapatan = [];
+
+                        data.wisata.forEach(function(w, i) {
+                            newLabels.push(w.nama);
+                            newTiket.push(w.tiket_bulan_ini);
+                            newPendapatan.push(w.pendapatan_bulan_ini);
+
+                            if (rows[i]) {
+                                var tiketCell = rows[i].querySelector('.wisata-tiket');
+                                var pendapatanCell = rows[i].querySelector('.wisata-pendapatan');
+                                if (tiketCell) tiketCell.textContent = w.tiket_bulan_ini;
+                                if (pendapatanCell) pendapatanCell.textContent = fmtRp(w.pendapatan_bulan_ini);
+                            }
+                        });
+
+                        // Update charts
+                        if (tiketChart) {
+                            tiketChart.data.labels = newLabels;
+                            tiketChart.data.datasets[0].data = newTiket;
+                            tiketChart.update('none');
+                        }
+                        if (pendapatanChart) {
+                            pendapatanChart.data.labels = newLabels;
+                            pendapatanChart.data.datasets[0].data = newPendapatan;
+                            pendapatanChart.update('none');
+                        }
+                    }
+                })
+                .catch(function() {});
         }
 
-        fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                var el = document.getElementById('dashboard-total-tiket');
-                if (el) el.textContent = Number(data.totalTiketBulan).toLocaleString('id-ID');
-                el = document.getElementById('dashboard-total-pendapatan');
-                if (el) el.textContent = fmtRp(data.totalPendapatanBulan);
+        if (periodeInput) {
+            periodeInput.addEventListener('change', function() { refresh(true); });
+        }
 
-                if (data.labelWaktu) {
-                    document.querySelectorAll('.label-waktu').forEach(function(lbl) {
-                        lbl.textContent = data.labelWaktu;
-                    });
-                }
-                
-                var tbody = document.getElementById('dashboard-wisata-tbody');
-                if (tbody && data.wisata && data.wisata.length) {
-                    var rows = tbody.querySelectorAll('tr');
-                    
-                    var newLabels = [];
-                    var newTiket = [];
-                    var newPendapatan = [];
-
-                    data.wisata.forEach(function(w, i) {
-                        newLabels.push(w.nama);
-                        newTiket.push(w.tiket_bulan_ini);
-                        newPendapatan.push(w.pendapatan_bulan_ini);
-
-                        if (rows[i]) {
-                            var tiketCell = rows[i].querySelector('.wisata-tiket');
-                            var pendapatanCell = rows[i].querySelector('.wisata-pendapatan');
-                            if (tiketCell) tiketCell.textContent = w.tiket_bulan_ini;
-                            if (pendapatanCell) pendapatanCell.textContent = fmtRp(w.pendapatan_bulan_ini);
-                        }
-                    });
-
-                    // Update charts
-                    if (tiketChart) {
-                        tiketChart.data.labels = newLabels;
-                        tiketChart.data.datasets[0].data = newTiket;
-                        tiketChart.update();
-                    }
-                    if (pendapatanChart) {
-                        pendapatanChart.data.labels = newLabels;
-                        pendapatanChart.data.datasets[0].data = newPendapatan;
-                        pendapatanChart.update();
-                    }
-                }
-            })
-            .catch(function() {});
+        if (dashboardInterval) clearInterval(dashboardInterval);
+        dashboardInterval = setInterval(function() { refresh(false); }, REALTIME_INTERVAL);
     }
 
-    if (periodeInput) periodeInput.addEventListener('change', function() { refresh(true); });
-
-    setInterval(function() { refresh(false); }, REALTIME_INTERVAL);
+    document.addEventListener("turbo:load", initDashboard);
+    
+    document.addEventListener("turbo:before-cache", function() {
+        if (dashboardInterval) clearInterval(dashboardInterval);
+    }, { once: true });
 })();
 </script>
 @endpush

@@ -20,7 +20,7 @@
                         <h6 class="card-title fw-bold text-primary">{{ $p->nama }}</h6>
                         <p class="card-text text-muted small mb-4">{{ Str::limit(strip_tags($p->keterangan), 80) }}</p>
                         <div class="mt-auto">
-                            <a href="{{ route('public.produk-khas.show', $p) }}" class="btn btn-outline-primary btn-sm w-100">Lebih Lanjut</a>
+                            <a href="{{ route('public.produk-khas.show', $p) }}" class="btn btn-outline-primary btn-sm w-100">Lihat Detail</a>
                         </div>
                     </div>
                 </div>

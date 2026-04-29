@@ -13,9 +13,6 @@
         <a href="{{ route('admin.laporan.print', request()->all()) }}" target="_blank" class="btn btn-outline-primary shadow-sm">
             <i class="bi bi-printer me-1"></i> Cetak
         </a>
-        <a href="{{ route('admin.penjualan-offline.create') }}" class="btn btn-primary shadow-sm">
-            <i class="bi bi-plus-circle me-1"></i> Input Penjualan Offline
-        </a>
     </div>
 </div>
 
@@ -118,12 +115,12 @@
                     <tbody id="tbody-online">
                         @forelse($dataOnline as $d)
                         <tr>
-                            <td class="small text-muted">{{ $d->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="fw-medium text-primary">{{ $d->kode_tiket }}</td>
-                            <td>{{ $d->user->name ?? '-' }}</td>
-                            <td class="text-center">{{ $d->jumlah }}</td>
-                            <td class="text-end fw-medium">Rp {{ number_format($d->total_harga, 0, ',', '.') }}</td>
-                            <td class="text-center">
+                            <td class="small text-muted" data-label="Waktu">{{ $d->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="fw-medium text-primary" data-label="Kode Tiket">{{ $d->kode_tiket }}</td>
+                            <td data-label="Pemesan">{{ $d->user->name ?? '-' }}</td>
+                            <td class="text-center" data-label="Jumlah">{{ $d->jumlah }}</td>
+                            <td class="text-end fw-medium" data-label="Total">Rp {{ number_format($d->total_harga, 0, ',', '.') }}</td>
+                            <td class="text-center" data-label="Status">
                                 @if($d->status === 'used')
                                     <span class="badge bg-success">Digunakan</span>
                                 @else
@@ -169,27 +166,27 @@
                     <tbody id="tbody-offline">
                         @forelse($dataOffline as $item)
                         <tr>
-                            <td class="fw-medium">{{ $item->tanggal->translatedFormat('d F Y') }}</td>
-                            <td class="text-center">
+                            <td class="fw-medium" data-label="Tanggal">{{ $item->tanggal->translatedFormat('d F Y') }}</td>
+                            <td class="text-center" data-label="Tiket Terjual">
                                 <span class="badge bg-warning text-dark rounded-pill">{{ $item->jumlah_tiket }}</span>
                             </td>
-                            <td class="text-end fw-bold text-success">
+                            <td class="text-end fw-bold text-success" data-label="Total Pendapatan">
                                 Rp {{ number_format($item->total_pendapatan, 0, ',', '.') }}
                             </td>
-                            <td class="small text-muted">{{ $item->creator->name ?? '-' }}</td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
+                            <td class="small text-muted" data-label="Diinput Oleh">{{ $item->creator->name ?? '-' }}</td>
+                            <td class="text-center" data-label="Aksi">
+                                <div class="btn-action-group">
                                     <a href="{{ route('admin.penjualan-offline.edit', $item->id_penjualan_offline) }}"
-                                       class="btn btn-sm btn-outline-primary" title="Edit">
+                                       class="btn btn-edit-subtle" title="Edit">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
                                     <button type="button"
-                                        class="btn btn-sm btn-outline-danger btn-hapus-offline"
+                                        class="btn btn-delete-subtle btn-hapus-offline"
                                         title="Hapus"
                                         data-id="{{ $item->id_penjualan_offline }}"
                                         data-tanggal="{{ $item->tanggal->translatedFormat('d F Y') }}"
                                         data-action="{{ route('admin.penjualan-offline.destroy', $item->id_penjualan_offline) }}">
-                                        <i class="bi bi-trash"></i>
+                                        <i class="bi bi-trash3"></i>
                                     </button>
                                 </div>
                             </td>
@@ -235,6 +232,7 @@
 @push('scripts')
 <script>
 (function () {
+    var laporanInterval;
     var form     = document.getElementById('form-laporan');
     var periode  = document.getElementById('periode');
     var tanggal  = document.getElementById('tanggal');
@@ -261,8 +259,15 @@
         }
 
         fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(r => r.json())
+            .then(r => {
+                if (r.status === 401) {
+                    if (laporanInterval) clearInterval(laporanInterval);
+                    return;
+                }
+                return r.json();
+            })
             .then(data => {
+                if (!data) return;
                 // Label
                 var labelEl = document.getElementById('label-periode');
                 if (labelEl) labelEl.textContent = data.label;
@@ -280,12 +285,12 @@
                     if (data.dataOnline && data.dataOnline.length > 0) {
                         tbodyOnline.innerHTML = data.dataOnline.map(d =>
                             `<tr>
-                                <td class="small text-muted">${d.waktu}</td>
-                                <td class="fw-medium text-primary">${d.kode_tiket}</td>
-                                <td>${d.pemesan}</td>
-                                <td class="text-center">${d.jumlah}</td>
-                                <td class="text-end fw-medium">${fmt(d.total_harga)}</td>
-                                <td class="text-center">${badgeStatus(d.status)}</td>
+                                <td class="small text-muted" data-label="Waktu">${d.waktu}</td>
+                                <td class="fw-medium text-primary" data-label="Kode Tiket">${d.kode_tiket}</td>
+                                <td data-label="Pemesan">${d.pemesan}</td>
+                                <td class="text-center" data-label="Jumlah">${d.jumlah}</td>
+                                <td class="text-end fw-medium" data-label="Total">${fmt(d.total_harga)}</td>
+                                <td class="text-center" data-label="Status">${badgeStatus(d.status)}</td>
                             </tr>`
                         ).join('');
                     } else {
@@ -299,16 +304,16 @@
                     if (data.dataOffline && data.dataOffline.length > 0) {
                         tbodyOffline.innerHTML = data.dataOffline.map(d =>
                             `<tr>
-                                <td class="fw-medium">${d.tanggal}</td>
-                                <td class="text-center"><span class="badge bg-warning text-dark rounded-pill">${d.jumlah_tiket}</span></td>
-                                <td class="text-end fw-bold text-success">${fmt(d.total_pendapatan)}</td>
-                                <td class="small text-muted">${d.diinput_oleh}</td>
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <a href="${d.url_edit}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil-square"></i></a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-hapus-offline"
+                                <td class="fw-medium" data-label="Tanggal">${d.tanggal}</td>
+                                <td class="text-center" data-label="Tiket Terjual"><span class="badge bg-warning text-dark rounded-pill">${d.jumlah_tiket}</span></td>
+                                <td class="text-end fw-bold text-success" data-label="Total Pendapatan">${fmt(d.total_pendapatan)}</td>
+                                <td class="small text-muted" data-label="Diinput Oleh">${d.diinput_oleh}</td>
+                                <td class="text-center" data-label="Aksi">
+                                    <div class="btn-action-group">
+                                        <a href="${d.url_edit}" class="btn btn-edit-subtle" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                        <button type="button" class="btn btn-delete-subtle btn-hapus-offline"
                                             data-tanggal="${d.tanggal}" data-action="${d.url_destroy}" title="Hapus">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="bi bi-trash3"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -343,8 +348,14 @@
     if (periode && tanggal) {
         periode.addEventListener('change', () => updateLaporan(false));
         tanggal.addEventListener('change', () => updateLaporan(false));
-        setInterval(() => updateLaporan(true), 1500);
+        
+        if (laporanInterval) clearInterval(laporanInterval);
+        laporanInterval = setInterval(() => updateLaporan(true), 1500);
     }
+
+    document.addEventListener("turbo:before-cache", function() {
+        if (laporanInterval) clearInterval(laporanInterval);
+    }, { once: true });
 })();
 </script>
 @endpush

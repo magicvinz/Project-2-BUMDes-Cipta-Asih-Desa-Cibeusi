@@ -78,6 +78,13 @@ class PengelolaDashboardController extends Controller
             $labelWaktu = 'Minggu Ini';
         }
 
+        // Data untuk grafik
+        $chartData = [
+            'labels' => $wisata->pluck('nama')->toArray(),
+            'tiket_terjual' => $wisata->map(fn($w) => (int) ($w->tiket_online ?? 0) + (int) ($w->tiket_offline ?? 0))->toArray(),
+            'pendapatan' => $wisata->map(fn($w) => (float) ($w->pendapatan_online ?? 0) + (float) ($w->pendapatan_offline ?? 0))->toArray(),
+        ];
+
         if ($request->expectsJson() || $request->ajax()) {
             $wisataData = $wisata->map(fn ($w) => [
                 'nama' => $w->nama,
@@ -89,15 +96,9 @@ class PengelolaDashboardController extends Controller
                 'totalTiketBulan' => $totalTiket,
                 'totalPendapatanBulan' => $totalPendapatan,
                 'wisata' => $wisataData,
+                'chartData' => $chartData
             ]);
         }
-
-        // Data untuk grafik
-        $chartData = [
-            'labels' => $wisata->pluck('nama')->toArray(),
-            'tiket_terjual' => $wisata->map(fn($w) => (int) ($w->tiket_online ?? 0) + (int) ($w->tiket_offline ?? 0))->toArray(),
-            'pendapatan' => $wisata->map(fn($w) => (float) ($w->pendapatan_online ?? 0) + (float) ($w->pendapatan_offline ?? 0))->toArray(),
-        ];
 
         return view('pengelola.dashboard', [
             'wisata' => $wisata,

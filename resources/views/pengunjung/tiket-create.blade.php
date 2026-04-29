@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $isCurug = $wisata->isCurugCibarebeuy();
+    $isCurug = $wisata->hasCamping();
 @endphp
 <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb mb-0">
@@ -18,7 +18,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-body p-4 p-md-5">
                 <h4 class="card-title fs-4 fw-semibold">Pesan Tiket {{ $wisata->nama }}</h4>
-                <p class="text-muted mt-1 mb-4">Harga: @if($isCurug) <strong>Kunjungan</strong> Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }} · <strong>Camping</strong> Rp {{ number_format(\App\Models\Wisata::HARGA_CAMPING_TIKET_CURUG, 0, ',', '.') }} <span class="text-muted">per tiket</span> @else Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }} per tiket @endif</p>
+                <p class="text-muted mt-1 mb-4">Harga: @if($isCurug) <strong>Kunjungan</strong> Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }} · <strong>Camping</strong> Rp {{ number_format($wisata->harga_camping_efektif, 0, ',', '.') }} <span class="text-muted">per tiket</span> @else Rp {{ number_format($wisata->harga_tiket, 0, ',', '.') }} per tiket @endif</p>
                 
                 <form action="{{ route('pengunjung.tiket.store') }}" method="post" id="form-tiket">
                     @csrf
@@ -88,7 +88,7 @@
 
 @push('scripts')
 @php
-    $hargaCampingVal  = \App\Models\Wisata::HARGA_CAMPING_TIKET_CURUG;
+    $hargaCampingVal  = $wisata->harga_camping_efektif;
     $isCurugJs        = $isCurug ? 'true' : 'false';
 @endphp
 <script>

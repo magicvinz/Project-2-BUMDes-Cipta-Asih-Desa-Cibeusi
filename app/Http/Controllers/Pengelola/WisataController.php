@@ -30,6 +30,7 @@ class WisataController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'harga_tiket' => 'required|numeric|min:0',
+            'harga_camping' => 'nullable|numeric|min:0',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ], [
@@ -39,6 +40,7 @@ class WisataController extends Controller
         ]);
 
         $validated['harga_tiket'] = (int) round($validated['harga_tiket']);
+        $validated['harga_camping'] = $request->filled('harga_camping') ? (int) round((float)$request->input('harga_camping')) : 0;
 
         if ($request->hasFile('gambar')) {
             $validated['gambar'] = $request->file('gambar')->store('wisata', 'public');
@@ -66,6 +68,7 @@ class WisataController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'harga_tiket' => 'required|numeric|min:0',
+            'harga_camping' => 'nullable|numeric|min:0',
             'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ], [
@@ -75,6 +78,8 @@ class WisataController extends Controller
         ]);
 
         $validated['harga_tiket'] = (int) round($validated['harga_tiket']);
+        $validated['harga_camping'] = $request->filled('harga_camping') ? (int) round((float)$request->input('harga_camping')) : 0;
+
 
         if ($request->hasFile('gambar')) {
             if ($wisata->gambar && Storage::disk('public')->exists($wisata->gambar)) {
@@ -109,8 +114,9 @@ class WisataController extends Controller
 
         $galleries = $wisata->galleries ?? [];
         $galleries[] = [
-            'image' => $path,
+            'image'   => $path,
             'caption' => $request->input('caption'),
+            'source'  => 'pengelola', // Menandai foto ditambahkan oleh pengelola
         ];
         $wisata->update(['galleries' => $galleries]);
 
@@ -120,19 +126,25 @@ class WisataController extends Controller
     public function destroyGallery(Wisata $wisata, $index)
     {
         $galleries = $wisata->galleries ?? [];
-        
-        if (isset($galleries[$index])) {
-            $imagePath = $galleries[$index]['image'];
-            if (Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-            unset($galleries[$index]);
-            // Re-index array
-            $galleries = array_values($galleries);
-            $wisata->update(['galleries' => $galleries]);
-            return back()->with('success', 'Foto galeri berhasil dihapus.');
+
+        if (!isset($galleries[$index])) {
+            return back()->with('error', 'Foto galeri tidak ditemukan.');
         }
 
-        return back()->with('error', 'Foto galeri tidak ditemukan.');
+        // Hanya foto yang ditambahkan oleh pengelola yang boleh dihapus
+        $source = $galleries[$index]['source'] ?? 'pengelola'; // default 'pengelola' untuk data lama
+        if ($source !== 'pengelola') {
+            return back()->with('error', 'Foto ini tidak dapat dihapus karena berasal dari ulasan pengunjung.');
+        }
+
+        $imagePath = $galleries[$index]['image'];
+        if (Storage::disk('public')->exists($imagePath)) {
+            Storage::disk('public')->delete($imagePath);
+        }
+        unset($galleries[$index]);
+        $galleries = array_values($galleries); // Re-index array
+        $wisata->update(['galleries' => $galleries]);
+
+        return back()->with('success', 'Foto galeri berhasil dihapus.');
     }
 }

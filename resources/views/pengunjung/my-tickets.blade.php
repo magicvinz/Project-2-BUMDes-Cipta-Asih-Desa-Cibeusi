@@ -11,7 +11,8 @@
 @else
     <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <!-- DESKTOP TABLE VIEW -->
+            <div class="table-responsive d-none d-md-block">
                 <table class="table table-hover table-striped align-middle mb-0">
                     <thead class="table-light">
                         <tr>
@@ -32,13 +33,13 @@
                             <td class="px-4 py-3 text-center">{{ $t->jumlah }}</td>
                             <td class="px-4 py-3">{{ $t->tanggal_berkunjung->format('d/m/Y') }}</td>
                             <td class="px-4 py-3">
-                                @if($t->wisata->isCurugCibarebeuy() && $t->camping)
+                                @if($t->wisata->hasCamping() && $t->camping)
                                     {{ $t->camping === 'Ya' ? 'Camping' : 'Kunjungan' }}
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center status-cell">
+                            <td class="px-4 py-3 text-center status-cell-ticket-{{ $t->id }}">
                                 @if($t->status === 'pending')
                                     <span class="badge rounded-pill bg-warning text-dark">Pending</span>
                                 @elseif($t->status === 'paid')
@@ -59,6 +60,44 @@
                     </tbody>
                 </table>
             </div>
+            </div>
+            
+            <!-- MOBILE CARD VIEW -->
+            <div class="d-md-none">
+                @foreach($tiket as $t)
+                <div class="p-3 border-bottom {{ $loop->last ? 'border-0' : '' }}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge bg-light fw-bold text-primary border border-primary-subtle mb-1">{{ $t->kode_tiket }}</span>
+                            <h6 class="fw-bold mb-0 text-dark">{{ $t->wisata->nama }}</h6>
+                        </div>
+                        <div class="status-cell-ticket-{{ $t->id }}">
+                            @if($t->status === 'pending')
+                                <span class="badge rounded-pill bg-warning text-dark">Pending</span>
+                            @elseif($t->status === 'paid')
+                                <span class="badge rounded-pill bg-success text-white">Paid</span>
+                            @elseif($t->status === 'used')
+                                <span class="badge rounded-pill bg-secondary text-white">Used</span>
+                            @elseif($t->status === 'cancelled')
+                                <span class="badge rounded-pill bg-danger text-white">Cancelled</span>
+                            @else
+                                <span class="badge rounded-pill bg-secondary text-white">{{ ucfirst($t->status) }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-3 d-flex justify-content-between">
+                        <span><i class="bi bi-calendar3 me-1"></i> {{ $t->tanggal_berkunjung->format('d/m/Y') }}</span>
+                        <span><i class="bi bi-people-fill me-1"></i> {{ $t->jumlah }} tiket
+                            @if($t->wisata->hasCamping() && $t->camping)
+                                · {{ $t->camping === 'Ya' ? 'Camp' : 'Kunj' }}
+                            @endif
+                        </span>
+                    </div>
+                    <a href="{{ route('pengunjung.tiket.show', $t) }}" class="btn btn-sm btn-outline-primary w-100 fw-medium">Lihat Detail</a>
+                </div>
+                @endforeach
+            </div>
+
         </div>
     </div>
     <div class="d-flex justify-content-center mt-4">
@@ -88,12 +127,11 @@
             .then(function(r) { return r.json(); })
             .then(function(res) {
                 if (!res.data || !res.data.length) return;
-                var rows = tbody.querySelectorAll('tr');
-                res.data.forEach(function(item, i) {
-                    if (rows[i]) {
-                        var statusCell = rows[i].querySelector('.status-cell');
-                        if (statusCell) statusCell.innerHTML = statusBadge(item.status);
-                    }
+                res.data.forEach(function(item) {
+                    var cells = document.querySelectorAll('.status-cell-ticket-' + item.id);
+                    cells.forEach(function(cell) {
+                        cell.innerHTML = statusBadge(item.status);
+                    });
                 });
             })
             .catch(function() {});
